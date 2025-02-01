@@ -4,8 +4,6 @@ const CopyPlugin = require("copy-webpack-plugin");
 module.exports = {
   entry: {
     background: "./src/background.js",
-    config: "./src/config.js",
-    content: "./src/content.js",
     options: "./src/options.js",
     popup: "./src/popup.js",
     notification: "./src/components/notification.js",
