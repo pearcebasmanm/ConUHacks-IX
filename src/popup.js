@@ -1,3 +1,5 @@
+import { BackgroundRequest, BackgroundResponse } from "./types";
+
 document.addEventListener("DOMContentLoaded", () => {
   const extractBtn = document.getElementById("extractBtn");
   const analyzeBtn = document.getElementById("analyzeBtn");
@@ -18,26 +20,19 @@ document.addEventListener("DOMContentLoaded", () => {
     contentDiv.textContent = "Extracting content...";
     analyzeBtn.disabled = true;
 
-    // Send message to background script to get Jina content
-    chrome.runtime.sendMessage(
-      {
-        action: "getJinaContent",
-        url: tab.url,
-      },
-      (response) => {
-        if (response && response.success) {
-          currentContent = response.content;
-          contentDiv.textContent = currentContent;
-          const wordCount = currentContent.trim().split(/\s+/).length;
-          wordCountDiv.textContent = `Word count: ${wordCount}`;
-          analyzeBtn.disabled = false;
-        } else {
-          contentDiv.textContent =
-            "Failed to extract content using Jina Reader. Please try again later.";
-          analyzeBtn.disabled = true;
-        }
+    const request = BackgroundRequest.createJinaRequest(tab.url);
+    chrome.runtime.sendMessage(request, (response) => {
+      if (response && response.success) {
+        currentContent = response.content;
+        contentDiv.textContent = currentContent;
+        const wordCount = currentContent.trim().split(/\s+/).length;
+        wordCountDiv.textContent = `Word count: ${wordCount}`;
+        analyzeBtn.disabled = false;
+      } else {
+        contentDiv.textContent = response.error || "Failed to extract content";
+        analyzeBtn.disabled = true;
       }
-    );
+    });
   });
 
   analyzeBtn.addEventListener("click", async () => {
@@ -47,30 +42,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     analysisDiv.textContent = "Analyzing...";
+    const request = BackgroundRequest.createAnalyzeRequest(currentContent);
 
-    chrome.runtime.sendMessage(
-      {
-        action: "analyzeContent",
-        content: currentContent,
-      },
-      (response) => {
-        if (response.success) {
-          try {
-            const analysis = JSON.parse(response.analysis);
-            analysisDiv.innerHTML = `
-                  <strong>Focus Analysis:</strong><br>
-                  Is Focused: ${analysis.isFocused}<br>
-                  Reason: ${analysis.reason}<br>
-                  Topics: ${analysis.topics.join(", ")}
-                `;
-          } catch (e) {
-            analysisDiv.textContent = response.analysis;
-          }
-        } else {
-          analysisDiv.innerHTML = `<span class="error">Analysis failed: ${response.error}</span>`;
+    chrome.runtime.sendMessage(request, (response) => {
+      if (response.success) {
+        try {
+          const analysis = JSON.parse(response.analysis);
+          analysisDiv.innerHTML = `
+            <strong>Focus Analysis:</strong><br>
+            Is Focused: ${analysis.isFocused}<br>
+            Reason: ${analysis.reason}<br>
+            Topics: ${analysis.topics.join(", ")}
+          `;
+        } catch (e) {
+          analysisDiv.textContent = response.analysis;
         }
+      } else {
+        analysisDiv.innerHTML = `<span class="error">Analysis failed: ${response.error}</span>`;
       }
-    );
+    });
   });
 
   settingsBtn.addEventListener("click", () => {

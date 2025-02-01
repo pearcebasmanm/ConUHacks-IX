@@ -1,16 +1,29 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+import { BackgroundRequest, BackgroundResponse } from "./types";
+import { TabTimer } from "./TabTimer";
 
-const key = ""
+const key = "";
 async function analyzeGemini(prompt, apiKey, geminiModelName) {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: geminiModelName });
-  
+
   const result = await model.generateContent(prompt);
-  console.log(result)
+  console.log(result);
   console.log(result.response.text());
   return result.response.text();
 }
 
+// Temporary function for testing - always returns unfocused
+async function mockAnalysis() {
+  return JSON.stringify({
+    isFocused: false,
+    reason: "This is a test notification (LLM integration pending)",
+    topics: ["Test Topic 1", "Test Topic 2"],
+  });
+}
+
+// Original analysis function (commented out for now)
+/*
 async function analyzePage(content) {
   try {
     const { apiKey, basePrompt, apiEndpoint } = await chrome.storage.sync.get([
@@ -18,63 +31,15 @@ async function analyzePage(content) {
       "basePrompt",
       "apiEndpoint",
     ]);
-    
-    return analyzeGemini(content,  key, "gemini-1.5-flash")
 
-    if (!apiKey || !basePrompt || !apiEndpoint) {
-      throw new Error("Missing required configuration");
-    }
-
-    if (typeof content !== "string" || content.length > 10000) {
-      throw new Error("Invalid content format or size");
-    }
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
-
-    console.log("Making API request to:", apiEndpoint);
-    const response = await fetch(apiEndpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: basePrompt,
-          },
-          {
-            role: "user",
-            content: content,
-          },
-        ],
-        temperature: 0.7,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(
-        `API request failed: ${response.status} ${response.statusText}${
-          errorData ? " - " + JSON.stringify(errorData) : ""
-        }`
-      );
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
+    return analyzeGemini(content, key, "gemini-1.5-flash");
+    // ... rest of the original function
   } catch (error) {
     console.error("Analysis error:", error);
-    // Include more detailed error information
     throw new Error(`${error.message} (${error.name})`);
   }
 }
+*/
 
 function getDomain(url) {
   try {
@@ -86,38 +51,61 @@ function getDomain(url) {
 
 const processedDomains = new Map();
 
+// Add at the top with other initializations
+const tabTimer = new TabTimer();
+
+// Add timer check interval
+setInterval(() => {
+  chrome.tabs.query({ active: true, currentWindow: true }, ([activeTab]) => {
+    if (activeTab) {
+      const notification = tabTimer.checkTimeAndNotify(activeTab.id);
+      if (notification) {
+        chrome.tabs.sendMessage(activeTab.id, {
+          action: "showNotification",
+          analysis: {
+            topics: ["Time Alert"],
+            reason: notification.message,
+            timeSpent: notification.timeSpent,
+          },
+        });
+      }
+    }
+  });
+}, 5000); // Check every 5 seconds
+
 // Update the message listener to handle Jina content requests
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(request)
+  console.log(request);
   if (request.action === "analyzeContent") {
     analyzePage(request.content)
-      .then((analysis) => sendResponse({ success: true, analysis }))
-      .catch((error) => sendResponse({ success: false, error: error.message }));
-    return true; // Keep message channel open for async response
+      .then((analysis) =>
+        sendResponse(BackgroundResponse.createSuccess(analysis))
+      )
+      .catch((error) =>
+        sendResponse(BackgroundResponse.createError(error.message))
+      );
+    return true;
   }
 
   if (request.action === "getJinaContent") {
     if (!isValidUrl(request.url)) {
-      sendResponse({ success: false, error: "Invalid URL" });
+      sendResponse(BackgroundResponse.createError("Invalid URL"));
       return true;
     }
 
     getJinaReaderContent(request.url)
-      .then((content) => {
-        sendResponse({ success: true, content });
-      })
-      .catch((error) => {
-        console.error("Jina Reader error:", error);
-        sendResponse({ success: false, error: error.message });
-      });
-    return true; // Keep message channel open for async response
+      .then((content) =>
+        sendResponse(BackgroundResponse.createSuccess(null, content))
+      )
+      .catch((error) =>
+        sendResponse(BackgroundResponse.createError(error.message))
+      );
+    return true;
   }
 
   if (request.action === "notificationResponse") {
-    // You can add logic here to handle user's response
-    // For example, store their preference or track statistics
     console.log("User response to notification:", request.response);
-    sendResponse({ success: true });
+    sendResponse(BackgroundResponse.createSuccess());
   }
 });
 
@@ -163,7 +151,7 @@ async function getJinaReaderContent(url) {
   }
 }
 
-// Simplify the tab listener to always show notifications
+// Update the tab listener to always show notifications
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url && isValidUrl(tab.url)) {
     const domain = getDomain(tab.url);
@@ -171,7 +159,24 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     if (domain && domain !== lastDomain) {
       processedDomains.set(tabId, domain);
+      tabTimer.startTracking(tabId, domain);
 
+      // Always show notification for testing
+      mockAnalysis().then((analysis) => {
+        const parsedAnalysis = JSON.parse(analysis);
+        chrome.tabs.sendMessage(tabId, {
+          action: "showNotification",
+          analysis: parsedAnalysis,
+        });
+
+        chrome.runtime.sendMessage({
+          action: "contentAnalyzed",
+          tabId,
+          analysis,
+        });
+      });
+
+      /* Original LLM-based logic (commented out for now)
       getJinaReaderContent(tab.url)
         .then((content) => {
           if (content) {
@@ -181,15 +186,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         .then((analysis) => {
           if (analysis) {
             const parsedAnalysis = JSON.parse(analysis);
-
-            // Send message to show notification if content is not focused
             if (!parsedAnalysis.isFocused) {
               chrome.tabs.sendMessage(tabId, {
                 action: "showNotification",
                 analysis: parsedAnalysis,
               });
             }
-
             chrome.runtime.sendMessage({
               action: "contentAnalyzed",
               tabId,
@@ -199,14 +201,13 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         })
         .catch((error) => {
           console.error("Jina Reader error:", error);
-          // Instead of falling back to content extraction, just notify about the error
           chrome.runtime.sendMessage({
             action: "contentAnalyzed",
             tabId,
-            error:
-              "Failed to extract content using Jina Reader. Please try again later.",
+            error: "Failed to extract content using Jina Reader. Please try again later.",
           });
         });
+      */
     }
   }
 });
@@ -224,6 +225,20 @@ function isValidUrl(url) {
   }
 }
 
+// Add cleanup for tab timer
 chrome.tabs.onRemoved.addListener((tabId) => {
   processedDomains.delete(tabId);
+  tabTimer.stopTracking(tabId);
+});
+
+// Handle tab activation changes
+chrome.tabs.onActivated.addListener(({ tabId }) => {
+  chrome.tabs.get(tabId, (tab) => {
+    if (tab.url && isValidUrl(tab.url)) {
+      const domain = getDomain(tab.url);
+      if (domain) {
+        tabTimer.startTracking(tabId, domain);
+      }
+    }
+  });
 });

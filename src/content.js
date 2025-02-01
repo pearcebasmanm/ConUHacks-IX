@@ -1,29 +1,26 @@
 import { createNotification } from "./components/notification";
+import { BackgroundRequest } from "./types";
 
 // Only keep notification-related functionality
 function showFocusNotification(analysis) {
+  const isTimeNotification = analysis.topics.includes("Time Alert");
   const notification = createNotification(
-    `This page appears to be about: ${analysis.topics.join(", ")}. 
-     ${analysis.reason}`,
+    `${analysis.reason}${
+      analysis.timeSpent ? ` (${analysis.timeSpent} minutes)` : ""
+    }`,
     () => {
       // Continue anyway
-      chrome.runtime.sendMessage({
-        action: "notificationResponse",
-        response: "continue",
-      });
+      const request = BackgroundRequest.createNotificationResponse("continue");
+      chrome.runtime.sendMessage(request);
     },
     () => {
       // Go back
-      chrome.runtime.sendMessage(
-        {
-          action: "notificationResponse",
-          response: "back",
-        },
-        () => {
-          window.history.back();
-        }
-      );
-    }
+      const request = BackgroundRequest.createNotificationResponse("back");
+      chrome.runtime.sendMessage(request, () => {
+        window.history.back();
+      });
+    },
+    isTimeNotification
   );
 
   document.body.appendChild(notification);

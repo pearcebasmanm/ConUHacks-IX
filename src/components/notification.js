@@ -64,6 +64,16 @@ const notificationStyles = `
   color: #4a4a4a;
 }
 
+.focus-notification-time {
+  background: #4a90e2;
+  border-color: #357abd;
+}
+
+.focus-notification-time .focus-notification-title,
+.focus-notification-time .focus-notification-continue {
+  color: #357abd;
+}
+
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -76,7 +86,12 @@ const notificationStyles = `
 }
 `;
 
-export function createNotification(message, onContinue, onBack) {
+export function createNotification(
+  message,
+  onContinue,
+  onBack,
+  isTimeNotification = false
+) {
   // Add styles if not already added
   if (!document.getElementById("focus-notification-styles")) {
     const style = document.createElement("style");
@@ -87,17 +102,27 @@ export function createNotification(message, onContinue, onBack) {
 
   // Create notification element
   const notification = document.createElement("div");
-  notification.className = "focus-notification";
+  notification.className = `focus-notification ${
+    isTimeNotification ? "focus-notification-time" : ""
+  }`;
 
   notification.innerHTML = `
     <div class="focus-notification-header">
-      <div class="focus-notification-title">Focus Alert</div>
+      <div class="focus-notification-title">${
+        isTimeNotification ? "Time Alert" : "Focus Alert"
+      }</div>
       <button class="focus-notification-close">&times;</button>
     </div>
     <div class="focus-notification-message">${message}</div>
     <div class="focus-notification-buttons">
-      <button class="focus-notification-button focus-notification-continue">Continue Anyway</button>
-      <button class="focus-notification-button focus-notification-back">Go Back</button>
+      <button class="focus-notification-button focus-notification-continue">Acknowledge</button>
+      ${
+        !isTimeNotification
+          ? `
+        <button class="focus-notification-button focus-notification-back">Go Back</button>
+      `
+          : ""
+      }
     </div>
   `;
 
