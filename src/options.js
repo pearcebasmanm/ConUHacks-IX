@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
       else
         document.getElementById("focusTopics").value =
           "work\nstudy\npersonal development";
-    }
+    },
   );
 
   // Save settings
@@ -56,8 +56,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Create dynamic base prompt
     const dynamicPrompt = `Analyze this web content and determine if it's related to the following focus topics: ${focusTopics.join(
-      ", "
-    )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}`;
+      ", ",
+    )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}. Always include topics regardless of whether or not the content is related to the focus topic. Ignore advertisements, basic ui labels, and other irrelevant parts of the input.`;
 
     chrome.storage.sync.set(
       {
@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
             showStatus("Warning: Settings may not have saved correctly", true);
           }
         });
-      }
+      },
     );
   });
 
