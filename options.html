@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      body {
+        width: 400px;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 5px;
+      }
+      textarea {
+        height: 100px;
+      }
+      .error {
+        color: red;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-group">
+      <label for="apiKey">API Key:</label>
+      <input type="password" id="apiKey" placeholder="Enter your API key" />
+    </div>
+    <div class="form-group">
+      <label for="basePrompt">Base Prompt:</label>
+      <textarea id="basePrompt">
+Analyze this web content and determine if it's related to the following focus topics: work, study, or personal development. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}</textarea
+      >
+    </div>
+    <div class="form-group">
+      <label for="apiEndpoint">API Endpoint:</label>
+      <input
+        type="text"
+        id="apiEndpoint"
+        value="https://api.openai.com/v1/chat/completions"
+      />
+    </div>
+    <div class="form-group">
+      <label for="focusTopics">Focus Topics (one per line):</label>
+      <textarea
+        id="focusTopics"
+        placeholder="work&#10;study&#10;personal development"
+      ></textarea>
+      <small
+        >Enter each topic on a new line. These topics will be used to determine
+        if content is focused.</small
+      >
+    </div>
+    <button id="save">Save Settings</button>
+    <div id="status"></div>
+    <script src="options.js"></script>
+  </body>
+</html>
