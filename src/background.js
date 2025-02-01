@@ -1,3 +1,16 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const key = ""
+async function analyzeGemini(prompt, apiKey, geminiModelName) {
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: geminiModelName });
+  
+  const result = await model.generateContent(prompt);
+  console.log(result)
+  console.log(result.response.text());
+  return result.response.text();
+}
+
 async function analyzePage(content) {
   try {
     const { apiKey, basePrompt, apiEndpoint } = await chrome.storage.sync.get([
@@ -5,6 +18,8 @@ async function analyzePage(content) {
       "basePrompt",
       "apiEndpoint",
     ]);
+    
+    return analyzeGemini(content,  key, "gemini-1.5-flash")
 
     if (!apiKey || !basePrompt || !apiEndpoint) {
       throw new Error("Missing required configuration");
@@ -73,6 +88,7 @@ const processedDomains = new Map();
 
 // Update the message listener to handle Jina content requests
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log(request)
   if (request.action === "analyzeContent") {
     analyzePage(request.content)
       .then((analysis) => sendResponse({ success: true, analysis }))
