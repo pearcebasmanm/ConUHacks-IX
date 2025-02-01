@@ -54,12 +54,16 @@ const processedDomains = new Map();
 // Add at the top with other initializations
 const tabTimer = new TabTimer();
 
-// Add timer check interval
+// Toggle flag for automatic content analysis
+const AUTO_ANALYZE = false; // Set to true to enable automatic analysis
+
+// Check all tabs periodically
 setInterval(() => {
   chrome.tabs.query({ active: true, currentWindow: true }, ([activeTab]) => {
     if (activeTab) {
-      const notification = tabTimer.checkTimeAndNotify(activeTab.id);
-      if (notification) {
+      const notifications = tabTimer.checkTimeAndNotify(activeTab.id);
+      // Show notifications for active tab if any
+      notifications.forEach((notification) => {
         chrome.tabs.sendMessage(activeTab.id, {
           action: "showNotification",
           analysis: {
@@ -68,10 +72,10 @@ setInterval(() => {
             timeSpent: notification.timeSpent,
           },
         });
-      }
+      });
     }
   });
-}, 5000); // Check every 5 seconds
+}, 5000);
 
 // Update the message listener to handle Jina content requests
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -151,7 +155,7 @@ async function getJinaReaderContent(url) {
   }
 }
 
-// Update the tab listener to always show notifications
+// Update the tab listener to use the toggle
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url && isValidUrl(tab.url)) {
     const domain = getDomain(tab.url);
@@ -161,53 +165,55 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       processedDomains.set(tabId, domain);
       tabTimer.startTracking(tabId, domain);
 
-      // Always show notification for testing
-      mockAnalysis().then((analysis) => {
-        const parsedAnalysis = JSON.parse(analysis);
-        chrome.tabs.sendMessage(tabId, {
-          action: "showNotification",
-          analysis: parsedAnalysis,
-        });
+      if (AUTO_ANALYZE) {
+        // Automatic analysis code
+        mockAnalysis().then((analysis) => {
+          const parsedAnalysis = JSON.parse(analysis);
+          chrome.tabs.sendMessage(tabId, {
+            action: "showNotification",
+            analysis: parsedAnalysis,
+          });
 
-        chrome.runtime.sendMessage({
-          action: "contentAnalyzed",
-          tabId,
-          analysis,
-        });
-      });
-
-      /* Original LLM-based logic (commented out for now)
-      getJinaReaderContent(tab.url)
-        .then((content) => {
-          if (content) {
-            return analyzePage(content);
-          }
-        })
-        .then((analysis) => {
-          if (analysis) {
-            const parsedAnalysis = JSON.parse(analysis);
-            if (!parsedAnalysis.isFocused) {
-              chrome.tabs.sendMessage(tabId, {
-                action: "showNotification",
-                analysis: parsedAnalysis,
-              });
-            }
-            chrome.runtime.sendMessage({
-              action: "contentAnalyzed",
-              tabId,
-              analysis,
-            });
-          }
-        })
-        .catch((error) => {
-          console.error("Jina Reader error:", error);
           chrome.runtime.sendMessage({
             action: "contentAnalyzed",
             tabId,
-            error: "Failed to extract content using Jina Reader. Please try again later.",
+            analysis,
           });
         });
-      */
+
+        /* Original LLM-based logic (will run when AUTO_ANALYZE is true)
+        getJinaReaderContent(tab.url)
+          .then((content) => {
+            if (content) {
+              return analyzePage(content);
+            }
+          })
+          .then((analysis) => {
+            if (analysis) {
+              const parsedAnalysis = JSON.parse(analysis);
+              if (!parsedAnalysis.isFocused) {
+                chrome.tabs.sendMessage(tabId, {
+                  action: "showNotification",
+                  analysis: parsedAnalysis,
+                });
+              }
+              chrome.runtime.sendMessage({
+                action: "contentAnalyzed",
+                tabId,
+                analysis,
+              });
+            }
+          })
+          .catch((error) => {
+            console.error("Jina Reader error:", error);
+            chrome.runtime.sendMessage({
+              action: "contentAnalyzed",
+              tabId,
+              error: "Failed to extract content using Jina Reader. Please try again later.",
+            });
+          });
+        */
+      }
     }
   }
 });
@@ -231,14 +237,36 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   tabTimer.stopTracking(tabId);
 });
 
-// Handle tab activation changes
+// Handle tab activation
 chrome.tabs.onActivated.addListener(({ tabId }) => {
   chrome.tabs.get(tabId, (tab) => {
     if (tab.url && isValidUrl(tab.url)) {
       const domain = getDomain(tab.url);
       if (domain) {
-        tabTimer.startTracking(tabId, domain);
+        tabTimer.updateLastActiveTime(tabId);
+        const pendingNotification = tabTimer.checkPendingNotifications(tabId);
+        if (pendingNotification) {
+          chrome.tabs.sendMessage(tabId, {
+            action: "showNotification",
+            analysis: {
+              topics: ["Time Alert"],
+              reason: pendingNotification.message,
+              timeSpent: pendingNotification.timeSpent,
+            },
+          });
+        }
       }
     }
   });
+});
+
+// Add window focus change handler
+chrome.windows.onFocusChanged.addListener((windowId) => {
+  if (windowId !== chrome.windows.WINDOW_ID_NONE) {
+    chrome.tabs.query({ active: true, windowId }, ([tab]) => {
+      if (tab && tab.url && isValidUrl(tab.url)) {
+        tabTimer.updateLastActiveTime(tab.id);
+      }
+    });
+  }
 });
