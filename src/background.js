@@ -1,8 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-import { BackgroundRequest, BackgroundResponse } from "./types";
 import { TabTimer } from "./TabTimer";
+import { BackgroundResponse } from "./types";
 
-const key = "";
 async function analyzeGemini(prompt, apiKey, geminiModelName) {
   const genAI = new GoogleGenerativeAI(apiKey);
   const model = genAI.getGenerativeModel({ model: geminiModelName });
@@ -89,10 +88,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "analyzeContent") {
     analyzePage(request.content)
       .then((analysis) =>
-        sendResponse(BackgroundResponse.createSuccess(analysis))
+        sendResponse(BackgroundResponse.createSuccess(analysis)),
       )
       .catch((error) =>
-        sendResponse(BackgroundResponse.createError(error.message))
+        sendResponse(BackgroundResponse.createError(error.message)),
       );
     return true;
   }
@@ -105,10 +104,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     getJinaReaderContent(request.url)
       .then((content) =>
-        sendResponse(BackgroundResponse.createSuccess(null, content))
+        sendResponse(BackgroundResponse.createSuccess(null, content)),
       )
       .catch((error) =>
-        sendResponse(BackgroundResponse.createError(error.message))
+        sendResponse(BackgroundResponse.createError(error.message)),
       );
     return true;
   }

@@ -21,9 +21,9 @@ button {
 }
 #settings {
     float: right;
-    filter: brightness(0.8)
-    border: 1px solid #ccc;
-}
-/* #settings:hover {
     background-color: var(--accent-color);
-} */
+    border: 2px solid black;
+}
+#settings:hover {
+    background-color: black;
+}
