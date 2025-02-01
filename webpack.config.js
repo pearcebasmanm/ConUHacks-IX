@@ -19,9 +19,12 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: "manifest.json", to: "manifest.json" },
+        { from: "src/styles.css", to: "styles.css" },
         { from: "src/popup.html", to: "popup.html" },
+        { from: "src/popup.css", to: "popup.css" },
         { from: "src/options.html", to: "options.html" },
         { from: "src/options.css", to: "options.css" },
+        { from: "src/components/notification.css", to: "notification.css" },
       ],
     }),
   ],

@@ -1,50 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-  <head>
-    <style>
-      body {
-        width: 400px;
-        padding: 10px;
-        font-family: Arial, sans-serif;
-      }
-      #content,
-      #analysis {
-        max-height: 200px;
-        overflow-y: auto;
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin-top: 10px;
-      }
-      .error {
-        color: red;
-        margin-top: 5px;
-      }
-      button {
-        margin: 5px;
-        padding: 5px 10px;
-      }
-      #settings {
-        float: right;
-        background-color: #f0f0f0;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        cursor: pointer;
-        padding: 5px 10px;
-      }
-      #settings:hover {
-        background-color: #e0e0e0;
-      }
-    </style>
-  </head>
-  <body>
-    <div>
-      <button id="extractBtn">Extract Content</button>
-      <button id="analyzeBtn">Analyze Content</button>
-      <button id="settings" aria-label="Open Settings">Settings</button>
-    </div>
-    <div id="wordCount"></div>
-    <div id="content"></div>
-    <div id="analysis"></div>
-    <script src="popup.js"></script>
-  </body>
+    <head>
+        <link rel="stylesheet" href="styles.css" />
+        <link rel="stylesheet" href="popup.css" />
+    </head>
+    <body>
+        <div>
+            <button id="extractBtn">Extract Content</button>
+            <button id="analyzeBtn">Analyze Content</button>
+            <button id="settings" aria-label="Open Settings">Settings</button>
+        </div>
+        <div id="wordCount"></div>
+        <div id="content"></div>
+        <div id="analysis"></div>
+        <script src="popup.js"></script>
+    </body>
 </html>
