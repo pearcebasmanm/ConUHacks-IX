@@ -3,8 +3,7 @@
   "name": "Focus Content Extractor",
   "version": "1.0",
   "description": "Extracts relevant content from web pages for focus monitoring",
-  "permissions": ["activeTab", "scripting", "storage", "tabs"],
-  "optional_permissions": ["<all_urls>"],
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
@@ -20,14 +19,5 @@
     "default_popup": "popup.html",
     "default_title": "Focus Content Extractor"
   },
-  "options_page": "options.html",
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": ["assets/*"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "options_page": "options.html"
 }
