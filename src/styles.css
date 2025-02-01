@@ -1,0 +1,50 @@
+:root {
+    --accent-color: #23022e;
+    --primary-color: #b5838d; /* Light Pink */
+    --secondary-color: #6d6875; /* Lavender */
+    --text-color: #4a4a4a;
+    --background-color: #ffffff;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover,
+li:hover {
+    background-color: var(--accent-color);
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+}
+
+input[type="text"],
+input[type="password"],
+select,
+textarea,
+.container {
+    padding: 10px;
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus,
+.container:focus,
+.content:focus {
+    outline: none;
+    border-color: var(--accent-color);
+}
