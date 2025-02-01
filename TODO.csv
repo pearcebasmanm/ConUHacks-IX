@@ -1,5 +1,9 @@
 Description,AssignedTo,Status
-Test accuracy of user chosen topics, Max, Working
-Connect to a LLM Api, Jaspreet & David, na
-Identify all prompts, na, na
-Work on the front end, Max, na
+Test accuracy of user chosen topics, Max, Improved the prompt
+Connect to a LLM Api, Jaspreet, Needs more work but its connected
+Identify all prompts, Fady, Working  
+Work on the front end, Max, Body is centered on the most recent version
+Prepend the base prompt to API call, Jaspreet, Working
+Send only the first 200 characters in the extracted propmt, Jaspreet, Working
+Create type name: BackgroundRequest which has fields: action <string>; url <string>; content <string> another object BackgroundResponse which has fields: success <boolean>; analysis <string>; content<string>; error <string>, David, na
+Work keeping the timer when switching back to a tab, David, na
