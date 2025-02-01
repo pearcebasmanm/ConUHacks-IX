@@ -1,126 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Extension Settings</title>
-    <style>
-      :root {
-        --primary-color: #ffb6c1; /* Light Pink */
-        --secondary-color: #e6e6fa; /* Lavender */
-        --text-color: #4a4a4a;
-        --background-color: #ffffff;
-      }
-
-      body {
-        width: 400px;
-        padding: 20px;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--background-color);
-        color: var(--text-color);
-        line-height: 1.6;
-      }
-
-      .form-group {
-        margin-bottom: 20px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-      }
-
-      input[type="text"],
-      input[type="password"],
-      textarea {
-        width: 100%;
-        padding: 10px;
-        border: 2px solid var(--secondary-color);
-        border-radius: 5px;
-        font-size: 14px;
-        transition: border-color 0.3s ease;
-      }
-
-      input[type="text"]:focus,
-      input[type="password"]:focus,
-      textarea:focus {
-        outline: none;
-        border-color: var(--primary-color);
-      }
-
-      textarea {
-        height: 100px;
-        resize: vertical;
-      }
-
-      .error {
-        color: #ff6b6b;
-        margin-top: 5px;
-        font-size: 14px;
-      }
-
-      button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        transition: background-color 0.3s ease;
-      }
-
-      button:hover {
-        background-color: #ff69b4;
-      }
-
-      small {
-        display: block;
-        margin-top: 5px;
-        color: #777;
-        font-size: 12px;
-      }
-
-      #status {
-        margin-top: 15px;
-        font-weight: 600;
-        color: #4caf50;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="form-group">
-      <label for="apiKey">API Key:</label>
-      <input type="password" id="apiKey" placeholder="Enter your API key" />
-    </div>
-    <div class="form-group">
-      <label for="basePrompt">Base Prompt:</label>
-      <textarea id="basePrompt">
-Analyze this web content and determine if it's related to the following focus topics: work, study, or personal development. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}</textarea
-      >
-    </div>
-    <div class="form-group">
-      <label for="apiEndpoint">API Endpoint:</label>
-      <input
-        type="text"
-        id="apiEndpoint"
-        value="https://api.openai.com/v1/chat/completions"
-      />
-    </div>
-    <div class="form-group">
-      <label for="focusTopics">Focus Topics (one per line):</label>
-      <textarea
-        id="focusTopics"
-        placeholder="work&#10;study&#10;personal development"
-      ></textarea>
-      <small
-        >Enter each topic on a new line. These topics will be used to determine
-        if content is focused.</small
-      >
-    </div>
-    <button id="save">Save Settings</button>
-    <div id="status"></div>
-    <script src="options.js"></script>
-  </body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Extension Settings</title>
+        <link rel="stylesheet" href="./options.css" />
+    </head>
+    <body>
+        <div id="settings">
+            <div class="form-group">
+                <label for="apiKey">API Key:</label>
+                <input
+                    type="password"
+                    id="apiKey"
+                    placeholder="Enter your API key"
+                />
+            </div>
+            <!-- <div class="form-group">
+                <label for="basePrompt">Base Prompt:</label>
+                <textarea id="basePrompt"></textarea>
+            </div> -->
+            <div class="form-group">
+                <label for="apiEndpoint">API Endpoint:</label>
+                <input
+                    type="text"
+                    id="apiEndpoint"
+                    value="https://api.openai.com/v1/chat/completions"
+                />
+            </div>
+            <div class="form-group">
+                <label for="focusTopics">Focus Topics (one per line):</label>
+                <textarea
+                    id="focusTopics"
+                    placeholder="work&#10;study&#10;personal development"
+                ></textarea>
+                <small
+                    >Enter each topic on a new line. These topics will be used
+                    to determine if content is focused.</small
+                >
+            </div>
+            <button id="save">Save Settings</button>
+            <div id="status"></div>
+            <p>Prompt for debugging:</p>
+            <p id="basePrompt"></p>
+        </div>
+        <script src="options.js"></script>
+    </body>
 </html>
