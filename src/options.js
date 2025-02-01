@@ -52,7 +52,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = topics
       .map(
         (item, index) =>
-          `<li id="chip-item-${item}"><span>${item}</span><a>X</a></li>`,
+          `<li id="chip-item-${item}"><span>${item}</span><a><strong>X</strong></a></li>`,
       )
       .join("");
 

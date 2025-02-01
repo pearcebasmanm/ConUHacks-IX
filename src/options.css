@@ -19,27 +19,6 @@ label {
     font-weight: 600;
 }
 
-input[type="text"],
-input[type="password"],
-select,
-textarea {
-    width: 100%;
-    padding: 10px;
-    border: 2px solid var(--secondary-color);
-    border-radius: 5px;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus,
-select:focus,
-textarea:focus,
-.content:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
-
 textarea {
     height: 100px;
     resize: vertical;
@@ -49,22 +28,6 @@ textarea {
     color: #ff6b6b;
     margin-top: 5px;
     font-size: 14px;
-}
-
-button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
-}
-
-button:hover,
-li:hover {
-    background-color: var(--accent-color);
 }
 
 small {
@@ -125,8 +88,4 @@ a {
     text-align: center;
     align-items: center;
     justify-content: center;
-
-    &:hover {
-        color: red;
-    }
 }
