@@ -1,4 +1,5 @@
 :root {
+    --accent-color: #ff69b4;
     --primary-color: #ffb6c1; /* Light Pink */
     --secondary-color: #e6e6fa; /* Lavender */
     --text-color: #4a4a4a;
@@ -41,7 +42,8 @@ textarea {
 input[type="text"]:focus,
 input[type="password"]:focus,
 select:focus,
-textarea:focus {
+textarea:focus,
+.content:focus {
     outline: none;
     border-color: var(--primary-color);
 }
@@ -68,8 +70,9 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
-    background-color: #ff69b4;
+button:hover,
+li:hover {
+    background-color: var(--accent-color);
 }
 
 small {
@@ -83,4 +86,55 @@ small {
     margin-top: 15px;
     font-weight: 600;
     color: #4caf50;
+}
+
+main {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+ul {
+    list-style: none;
+    margin: 0px;
+    padding: 0px;
+    display: inline-block;
+}
+
+li {
+    display: inline-block;
+    background: var(--primary-color);
+    color: white;
+    padding: 3px 5px 3px 10px;
+    border-radius: 15px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+li:hover {
+    cursor: pointer;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+    margin-left: 5px;
+    font-size: 10px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: inline-flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        color: red;
+    }
 }

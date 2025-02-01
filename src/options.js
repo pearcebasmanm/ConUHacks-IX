@@ -1,15 +1,7 @@
-const defaultTopics = ["work", "study", "personal development"];
-
-function getFocusTopics() {
-  return document
-    .getElementById("focusTopics")
-    .value.split("\n")
-    .map((topic) => topic.trim())
-    .filter((topic) => topic.length > 0);
-}
+let topics = ["work", "study", "personal development"];
 
 function generatePrompt() {
-  return `Analyze this web content and determine if it's related to the following focus topics: ${getFocusTopics().join(
+  return `Analyze this web content and determine if it's related to the following focus topics: ${topics.join(
     ", ",
   )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}. Always include topics regardless of whether or not the content is related to the focus topic. Ignore advertisements, basic ui labels, and other irrelevant parts of the input.`;
 }
@@ -19,31 +11,69 @@ function updatePrompt() {
 }
 
 const basePrompt = document.addEventListener("DOMContentLoaded", () => {
+  const focusTopics = document.getElementById("focusTopics");
+  const list = document.getElementById("list");
+
   // Load saved settings
   chrome.storage.sync.get(["apiKey", "apiEndpoint", "focusTopics"], (data) => {
-    if (data.apiKey) document.getElementById("apiKey").value = data.apiKey;
+    if (data.apiKey) {
+      document.getElementById("apiKey").value = data.apiKey;
+    }
     if (data.apiEndpoint) {
       document.getElementById("apiEndpoint").value = data.apiEndpoint;
     }
-    document.getElementById("focusTopics").value = (
-      data.focusTopics ?? defaultTopics
-    ).join("\n");
+    if (data.focusTopics) {
+      topics = data.focusTopics;
+    }
+    updateChips();
+  });
+
+  focusTopics.addEventListener("keypress", function (e) {
+    if (e.key !== "Enter") {
+      return;
+    }
+    let val = focusTopics.value.trim();
+    if (val === "") {
+      alert("Please type a tag Name");
+      return;
+    }
+    if (topics.indexOf(val) >= 0) {
+      alert("Tag name is a duplicate");
+      return;
+    }
+
+    topics.push(val);
+    updateChips();
+    focusTopics.value = "";
+    focusTopics.focus();
+  });
+
+  function updateChips() {
+    list.innerHTML = topics
+      .map(
+        (item, index) =>
+          `<li id="chip-item-${item}"><span>${item}</span><a>X</a></li>`,
+      )
+      .join("");
+
+    for (const [i, item] of topics.entries()) {
+      document
+        .getElementById(`chip-item-${item}`)
+        .addEventListener("click", () => {
+          topics = topics.filter((item) => topics.indexOf(item) != i);
+          updateChips();
+        });
+    }
 
     // for debugging purposes
     updatePrompt();
-  });
-
-  // for debugging purposes
-  document
-    .getElementById("focusTopics")
-    .addEventListener("input", updatePrompt);
+  }
 
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
     const modelName = document.getElementById("modelName").value;
     const apiKey = document.getElementById("apiKey").value.trim();
     const apiEndpoint = document.getElementById("apiEndpoint").value.trim();
-    const focusTopics = getFocusTopics();
     const basePrompt = generatePrompt();
 
     /* Validate inputs */
@@ -63,12 +93,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!basePrompt) {
-      showStatus("Base prompt is required!", true);
-      return;
-    }
-
-    if (focusTopics.length === 0) {
+    if (topics === 0) {
       showStatus("At least one focus topic is required!", true);
       return;
     }
@@ -79,7 +104,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
         apiKey,
         basePrompt,
         apiEndpoint,
-        focusTopics,
+        focusTopics: topics,
       },
       () => {
         showStatus("Settings saved successfully!");

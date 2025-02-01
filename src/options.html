@@ -23,10 +23,6 @@
                     placeholder="Enter your API key"
                 />
             </div>
-            <!-- <div class="form-group">
-                <label for="basePrompt">Base Prompt:</label>
-                <textarea id="basePrompt"></textarea>
-            </div> -->
             <div class="form-group">
                 <label for="apiEndpoint">API Endpoint:</label>
                 <input
@@ -37,14 +33,18 @@
             </div>
             <div class="form-group">
                 <label for="focusTopics">Focus Topics (one per line):</label>
-                <textarea
+                <div class="container">
+                    <ul id="list"></ul>
+                </div>
+                <input
+                    type="text"
                     id="focusTopics"
-                    placeholder="work&#10;study&#10;personal development"
-                ></textarea>
-                <small
-                    >Enter each topic on a new line. These topics will be used
-                    to determine if content is focused.</small
-                >
+                    placeholder="type and Enter ..."
+                />
+                <small>
+                    These topics will be used to determine if content is
+                    focused.
+                </small>
             </div>
             <button id="save">Save Settings</button>
             <div id="status"></div>
