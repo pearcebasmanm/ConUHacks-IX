@@ -96,6 +96,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
     return true; // Keep message channel open for async response
   }
+
+  if (request.action === "notificationResponse") {
+    // You can add logic here to handle user's response
+    // For example, store their preference or track statistics
+    console.log("User response to notification:", request.response);
+    sendResponse({ success: true });
+  }
 });
 
 // Update getJinaReaderContent function
@@ -140,7 +147,7 @@ async function getJinaReaderContent(url) {
   }
 }
 
-// Update the tab listener to use the new message system
+// Simplify the tab listener to always show notifications
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url && isValidUrl(tab.url)) {
     const domain = getDomain(tab.url);
@@ -157,6 +164,16 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         })
         .then((analysis) => {
           if (analysis) {
+            const parsedAnalysis = JSON.parse(analysis);
+
+            // Send message to show notification if content is not focused
+            if (!parsedAnalysis.isFocused) {
+              chrome.tabs.sendMessage(tabId, {
+                action: "showNotification",
+                analysis: parsedAnalysis,
+              });
+            }
+
             chrome.runtime.sendMessage({
               action: "contentAnalyzed",
               tabId,
@@ -165,25 +182,14 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           }
         })
         .catch((error) => {
-          console.error("Processing error:", error);
-          // Fallback to direct page extraction
-          chrome.tabs.sendMessage(
+          console.error("Jina Reader error:", error);
+          // Instead of falling back to content extraction, just notify about the error
+          chrome.runtime.sendMessage({
+            action: "contentAnalyzed",
             tabId,
-            { action: "extractContent" },
-            (response) => {
-              if (response && response.content) {
-                analyzePage(response.content)
-                  .then((analysis) => {
-                    chrome.runtime.sendMessage({
-                      action: "contentAnalyzed",
-                      tabId,
-                      analysis,
-                    });
-                  })
-                  .catch(console.error);
-              }
-            }
-          );
+            error:
+              "Failed to extract content using Jina Reader. Please try again later.",
+          });
         });
     }
   }

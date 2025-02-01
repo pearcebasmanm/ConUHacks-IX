@@ -32,24 +32,9 @@ document.addEventListener("DOMContentLoaded", () => {
           wordCountDiv.textContent = `Word count: ${wordCount}`;
           analyzeBtn.disabled = false;
         } else {
-          // Fallback to direct page extraction
-          chrome.tabs.sendMessage(
-            tab.id,
-            { action: "extractContent" },
-            (response) => {
-              if (response && response.content) {
-                currentContent = response.content;
-                contentDiv.textContent = currentContent;
-                const wordCount = currentContent.trim().split(/\s+/).length;
-                wordCountDiv.textContent = `Word count: ${wordCount}`;
-                analyzeBtn.disabled = false;
-              } else {
-                contentDiv.textContent =
-                  "Could not extract content. The page might be still loading or have restricted access.";
-                analyzeBtn.disabled = true;
-              }
-            }
-          );
+          contentDiv.textContent =
+            "Failed to extract content using Jina Reader. Please try again later.";
+          analyzeBtn.disabled = true;
         }
       }
     );
