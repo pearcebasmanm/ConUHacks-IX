@@ -2,7 +2,7 @@ let topics = ["work", "study", "personal development"];
 
 function generatePrompt() {
   return `Analyze this web content and determine if it's related to the following focus topics: ${topics.join(
-    ", ",
+    ", "
   )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}. Always include topics regardless of whether or not the content is related to the focus topic. Ignore advertisements, basic ui labels, and other irrelevant parts of the input.`;
 }
 
@@ -52,7 +52,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = topics
       .map(
         (item, index) =>
-          `<li id="chip-item-${item}"><span>${item}</span><a><strong>X</strong></a></li>`,
+          `<li id="chip-item-${item}"><span>${item}</span><a><strong>X</strong></a></li>`
       )
       .join("");
 
@@ -114,7 +114,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
             showStatus("Warning: Settings may not have saved correctly", true);
           }
         });
-      },
+      }
     );
   });
 
