@@ -3,28 +3,24 @@ export class TabTimer {
     this.tabTimes = new Map(); // Maps tabId -> { startTime, lastNotification, pendingNotifications, lastActiveTime }
     this.INACTIVE_THRESHOLD = 30 * 60 * 1000; // 30 minutes in milliseconds
 
-    // Updated intervals with more detailed messages
+    // Updated intervals with more detailed messages and correct time values
     this.intervals = [
       {
         time: 0,
-        getMessage: (timeSpent) => "You just started browsing this page",
+        getMessage: (timeSpent) => "Initial visit to this page",
       },
       {
-        time: 15 * 60 * 1000,
+        time: 10 * 1000, // 10 seconds
         getMessage: (timeSpent) =>
-          `You've spent ${Math.floor(
-            timeSpent / 60
-          )} minutes here. Taking a short break might help maintain focus.`,
+          `You've been on this page for ${Math.floor(timeSpent)} seconds`,
       },
       {
-        time: 30 * 60 * 1000,
-        getMessage: (timeSpent) =>
-          `30 minutes have passed. Consider if this aligns with your focus goals.`,
+        time: 20 * 1000, // 20 seconds
+        getMessage: (timeSpent) => `20 seconds have passed on this page`,
       },
       {
-        time: 60 * 60 * 1000,
-        getMessage: (timeSpent) =>
-          `You've been here for an hour. Time for a proper break?`,
+        time: 30 * 1000, // 30 seconds
+        getMessage: (timeSpent) => `30 seconds on this page - time check!`,
       },
     ];
   }
@@ -40,14 +36,15 @@ export class TabTimer {
         // Reset the timer but don't show initial notification
         this.tabTimes.set(tabId, {
           startTime: now,
-          lastNotification: 0, // Skip initial notification
+          lastNotification: -1,
           pendingNotifications: [],
           lastActiveTime: now,
           domain,
         });
       } else {
-        // Just update the last active time
+        // Just update the last active time and domain
         existingTab.lastActiveTime = now;
+        existingTab.domain = domain;
       }
     } else {
       // New tab tracking
@@ -76,36 +73,50 @@ export class TabTimer {
     const notifications = [];
     const now = Date.now();
 
-    // Check all tabs
-    for (const [tabId, tabInfo] of this.tabTimes.entries()) {
-      // Check for inactivity
-      const inactiveTime = now - tabInfo.lastActiveTime;
-      if (inactiveTime >= this.INACTIVE_THRESHOLD) {
-        continue; // Skip notifications for inactive tabs
-      }
+    console.log("=== Timer Check ===");
+    console.log("Active Tab ID:", activeTabId);
+    console.log("All Tabs:", Array.from(this.tabTimes.entries()));
 
+    for (const [tabId, tabInfo] of this.tabTimes.entries()) {
+      const inactiveTime = now - tabInfo.lastActiveTime;
       const timeSpent = now - tabInfo.startTime;
 
-      // Find all intervals that should have triggered
-      const dueIntervals = this.intervals.filter(
-        (interval) =>
-          interval.time <= timeSpent && interval.time > tabInfo.lastNotification
-      );
+      console.log(`\nChecking Tab ${tabId}:`);
+      console.log("- Time spent:", Math.floor(timeSpent / 1000), "seconds");
+      console.log("- Last notification:", tabInfo.lastNotification);
+      console.log("- Is active tab:", tabId === activeTabId);
 
-      if (dueIntervals.length > 0) {
-        if (tabId === activeTabId) {
-          const latestInterval = dueIntervals[dueIntervals.length - 1];
-          tabInfo.lastNotification = latestInterval.time;
-          notifications.push({
-            message: latestInterval.getMessage(timeSpent / 1000), // Convert to seconds for message
-            timeSpent: Math.floor(timeSpent / 1000 / 60),
-          });
-        } else {
-          tabInfo.pendingNotifications.push(...dueIntervals);
-        }
+      if (inactiveTime >= this.INACTIVE_THRESHOLD) {
+        console.log("- Tab inactive, skipping");
+        continue;
+      }
+
+      // Find all intervals that should trigger
+      const dueIntervals = this.intervals.filter((interval) => {
+        const shouldTrigger =
+          interval.time <= timeSpent &&
+          (tabInfo.lastNotification === -1 ||
+            interval.time > tabInfo.lastNotification);
+        return shouldTrigger;
+      });
+
+      console.log("- Due intervals:", dueIntervals);
+
+      if (dueIntervals.length > 0 && tabId === activeTabId) {
+        const latestInterval = dueIntervals[dueIntervals.length - 1];
+        tabInfo.lastNotification = latestInterval.time;
+        notifications.push({
+          message: latestInterval.getMessage(timeSpent / 1000),
+          timeSpent: Math.floor(timeSpent / 1000),
+        });
+        console.log(
+          "- Queued notification:",
+          notifications[notifications.length - 1]
+        );
       }
     }
 
+    console.log("\nReturning notifications:", notifications);
     return notifications;
   }
 

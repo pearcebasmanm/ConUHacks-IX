@@ -115,12 +115,12 @@ export function createNotification(
     </div>
     <div class="focus-notification-message">${message}</div>
     <div class="focus-notification-buttons">
-      <button class="focus-notification-button focus-notification-continue">Acknowledge</button>
+      <button class="focus-notification-button focus-notification-continue">
+        ${isTimeNotification ? "Acknowledge" : "Continue Anyway"}
+      </button>
       ${
         !isTimeNotification
-          ? `
-        <button class="focus-notification-button focus-notification-back">Go Back</button>
-      `
+          ? `<button class="focus-notification-button focus-notification-back">Go Back</button>`
           : ""
       }
     </div>
@@ -140,12 +140,16 @@ export function createNotification(
       notification.remove();
     });
 
-  notification
-    .querySelector(".focus-notification-back")
-    .addEventListener("click", () => {
-      onBack?.();
-      notification.remove();
-    });
+  // Only add back button listener if it's not a time notification
+  if (!isTimeNotification) {
+    const backButton = notification.querySelector(".focus-notification-back");
+    if (backButton) {
+      backButton.addEventListener("click", () => {
+        onBack?.();
+        notification.remove();
+      });
+    }
+  }
 
   return notification;
 }
