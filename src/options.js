@@ -1,38 +1,57 @@
-document.addEventListener("DOMContentLoaded", () => {
+const defaultTopics = ["work", "study", "personal development"];
+
+function getFocusTopics() {
+  return document
+    .getElementById("focusTopics")
+    .value.split("\n")
+    .map((topic) => topic.trim())
+    .filter((topic) => topic.length > 0);
+}
+
+function generatePrompt() {
+  return `Analyze this web content and determine if it's related to the following focus topics: ${getFocusTopics().join(
+    ", ",
+  )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}. Always include topics regardless of whether or not the content is related to the focus topic. Ignore advertisements, basic ui labels, and other irrelevant parts of the input.`;
+}
+
+function updatePrompt() {
+  document.getElementById("basePrompt").innerHTML = generatePrompt();
+}
+
+const basePrompt = document.addEventListener("DOMContentLoaded", () => {
   // Load saved settings
-  chrome.storage.sync.get(
-    ["apiKey", "basePrompt", "apiEndpoint", "focusTopics"],
-    (data) => {
-      if (data.apiKey) document.getElementById("apiKey").value = data.apiKey;
-      if (data.basePrompt)
-        document.getElementById("basePrompt").value = data.basePrompt;
-      if (data.apiEndpoint)
-        document.getElementById("apiEndpoint").value = data.apiEndpoint;
-      if (data.focusTopics)
-        document.getElementById("focusTopics").value =
-          data.focusTopics.join("\n");
-      else
-        document.getElementById("focusTopics").value =
-          "work\nstudy\npersonal development";
-    },
-  );
+  chrome.storage.sync.get(["apiKey", "apiEndpoint", "focusTopics"], (data) => {
+    if (data.apiKey) document.getElementById("apiKey").value = data.apiKey;
+    if (data.apiEndpoint) {
+      document.getElementById("apiEndpoint").value = data.apiEndpoint;
+    }
+    document.getElementById("focusTopics").value = (
+      data.focusTopics ?? defaultTopics
+    ).join("\n");
+
+    // for debugging purposes
+    updatePrompt();
+  });
+
+  // for debugging purposes
+  document
+    .getElementById("focusTopics")
+    .addEventListener("input", updatePrompt);
 
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
     const apiKey = document.getElementById("apiKey").value.trim();
-    const basePrompt = document.getElementById("basePrompt").value.trim();
     const apiEndpoint = document.getElementById("apiEndpoint").value.trim();
-    const focusTopics = document
-      .getElementById("focusTopics")
-      .value.split("\n")
-      .map((topic) => topic.trim())
-      .filter((topic) => topic.length > 0);
+    const focusTopics = getFocusTopics();
+    const basePrompt = generatePrompt();
 
-    // Validate inputs
-    if (!apiKey) {
-      showStatus("API Key is required!", true);
-      return;
-    }
+    /* Validate inputs */
+
+    // // You shouldn't need a key to save preferences
+    // if (!apiKey) {
+    //   showStatus("API Key is required!", true);
+    //   return;
+    // }
 
     if (!apiKey.startsWith("sk-")) {
       showStatus('Invalid API Key format. Should start with "sk-"', true);
@@ -54,15 +73,10 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Create dynamic base prompt
-    const dynamicPrompt = `Analyze this web content and determine if it's related to the following focus topics: ${focusTopics.join(
-      ", ",
-    )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}. Always include topics regardless of whether or not the content is related to the focus topic. Ignore advertisements, basic ui labels, and other irrelevant parts of the input.`;
-
     chrome.storage.sync.set(
       {
         apiKey,
-        basePrompt: dynamicPrompt,
+        basePrompt,
         apiEndpoint,
         focusTopics,
       },
