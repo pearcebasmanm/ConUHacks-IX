@@ -1,0 +1,18 @@
+{
+  "name": "conuhacks-ix",
+  "version": "1.0.0",
+  "description": "Current Version:\r -extracts web content\r -parses web content to LLM API to check if it is within \"focus topics\" (user can preset these topics)",
+  "main": "background.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "copy-webpack-plugin": "^12.0.2",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
+  }
+}
