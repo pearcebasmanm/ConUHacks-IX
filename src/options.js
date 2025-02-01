@@ -40,6 +40,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
 
   // Save settings
   document.getElementById("save").addEventListener("click", () => {
+    const modelName = document.getElementById("modelName").value;
     const apiKey = document.getElementById("apiKey").value.trim();
     const apiEndpoint = document.getElementById("apiEndpoint").value.trim();
     const focusTopics = getFocusTopics();
@@ -47,24 +48,23 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
 
     /* Validate inputs */
 
-    // // You shouldn't need a key to save preferences
+    // // You shouldn't need a key
     // if (!apiKey) {
     //   showStatus("API Key is required!", true);
     //   return;
     // }
-
-    if (!apiKey.startsWith("sk-")) {
-      showStatus('Invalid API Key format. Should start with "sk-"', true);
+    // if (!apiKey.startsWith("sk-")) {
+    //   showStatus('Invalid API Key format. Should start with "sk-"', true);
+    //   return;
+    // }
+    //
+    if (!apiEndpoint || !apiEndpoint.startsWith("http")) {
+      showStatus("Invalid API endpoint URL", true);
       return;
     }
 
     if (!basePrompt) {
       showStatus("Base prompt is required!", true);
-      return;
-    }
-
-    if (!apiEndpoint || !apiEndpoint.startsWith("http")) {
-      showStatus("Invalid API endpoint URL", true);
       return;
     }
 
@@ -75,6 +75,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
 
     chrome.storage.sync.set(
       {
+        modelName,
         apiKey,
         basePrompt,
         apiEndpoint,
