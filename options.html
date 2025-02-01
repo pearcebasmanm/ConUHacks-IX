@@ -6,33 +6,19 @@
     <title>Extension Settings</title>
     <style>
       :root {
-        --primary-color: #80a4ed;
-        --secondary-color: #f9ab55;
-        --primary-light: #a0beff;
-        --secondary-light: #ffcb8a;
-        --background-color: #f0f4f8;
-        --text-color: #333333;
+        --primary-color: #ffb6c1; /* Light Pink */
+        --secondary-color: #e6e6fa; /* Lavender */
+        --text-color: #4a4a4a;
+        --background-color: #ffffff;
       }
 
       body {
         width: 400px;
-        min-height: 450px;
-        margin: 0;
         padding: 20px;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         background-color: var(--background-color);
         color: var(--text-color);
         line-height: 1.6;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-
-      .container {
-        background-color: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       .form-group {
@@ -43,7 +29,6 @@
         display: block;
         margin-bottom: 5px;
         font-weight: 600;
-        color: var(--primary-color);
       }
 
       input[type="text"],
@@ -51,10 +36,10 @@
       textarea {
         width: 100%;
         padding: 10px;
-        border: 2px solid var(--primary-light);
+        border: 2px solid var(--secondary-color);
         border-radius: 5px;
         font-size: 14px;
-        transition: all 0.3s ease;
+        transition: border-color 0.3s ease;
       }
 
       input[type="text"]:focus,
@@ -62,7 +47,6 @@
       textarea:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px var(--primary-light);
       }
 
       textarea {
@@ -77,7 +61,7 @@
       }
 
       button {
-        background-color: var(--secondary-color);
+        background-color: var(--primary-color);
         color: white;
         border: none;
         padding: 10px 20px;
@@ -85,11 +69,10 @@
         cursor: pointer;
         font-size: 16px;
         transition: background-color 0.3s ease;
-        width: 100%;
       }
 
       button:hover {
-        background-color: var(--primary-color);
+        background-color: #ff69b4;
       }
 
       small {
@@ -102,103 +85,42 @@
       #status {
         margin-top: 15px;
         font-weight: 600;
-        color: var(--primary-color);
-        text-align: center;
-      }
-
-      .chips-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 5px;
-        margin-top: 10px;
-      }
-
-      .chip {
-        background-color: var(--secondary-light);
-        color: var(--text-color);
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 14px;
-        display: inline-flex;
-        align-items: center;
-      }
-
-      .chip .remove {
-        margin-left: 5px;
-        cursor: pointer;
-        font-weight: bold;
-      }
-
-      #focusTopics {
-        height: 40px;
+        color: #4caf50;
       }
     </style>
   </head>
   <body>
-    <div class="container">
-      <div class="form-group">
-        <label for="apiKey">API Key</label>
-        <input type="password" id="apiKey" placeholder="Enter your API key" />
-      </div>
-      <div class="form-group">
-        <label for="basePrompt">Base Prompt</label>
-        <textarea id="basePrompt">
-Analyze this web content and determine if it's related to the following focus topics: work, study, or personal development. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}</textarea
-        >
-      </div>
-      <div class="form-group">
-        <label for="apiEndpoint">API Endpoint</label>
-        <input
-          type="text"
-          id="apiEndpoint"
-          value="https://api.openai.com/v1/chat/completions"
-        />
-      </div>
-      <div class="form-group">
-        <label for="focusTopics">Focus Topics</label>
-        <input
-          type="text"
-          id="focusTopics"
-          placeholder="Enter a topic and press Enter"
-        />
-        <small>Press Enter to add a new topic</small>
-        <div id="topicChips" class="chips-container"></div>
-      </div>
-      <button id="save">Save Settings</button>
-      <div id="status"></div>
+    <div class="form-group">
+      <label for="apiKey">API Key:</label>
+      <input type="password" id="apiKey" placeholder="Enter your API key" />
     </div>
+    <div class="form-group">
+      <label for="basePrompt">Base Prompt:</label>
+      <textarea id="basePrompt">
+Analyze this web content and determine if it's related to the following focus topics: work, study, or personal development. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}</textarea
+      >
+    </div>
+    <div class="form-group">
+      <label for="apiEndpoint">API Endpoint:</label>
+      <input
+        type="text"
+        id="apiEndpoint"
+        value="https://api.openai.com/v1/chat/completions"
+      />
+    </div>
+    <div class="form-group">
+      <label for="focusTopics">Focus Topics (one per line):</label>
+      <textarea
+        id="focusTopics"
+        placeholder="work&#10;study&#10;personal development"
+      ></textarea>
+      <small
+        >Enter each topic on a new line. These topics will be used to determine
+        if content is focused.</small
+      >
+    </div>
+    <button id="save">Save Settings</button>
+    <div id="status"></div>
     <script src="options.js"></script>
-    <script>
-      const focusTopicsInput = document.getElementById("focusTopics");
-      const topicChipsContainer = document.getElementById("topicChips");
-      const topics = new Set();
-
-      focusTopicsInput.addEventListener("keydown", function (event) {
-        if (event.key === "Enter") {
-          event.preventDefault();
-          const topic = this.value.trim();
-          if (topic && !topics.has(topic)) {
-            addChip(topic);
-            topics.add(topic);
-            this.value = "";
-          }
-        }
-      });
-
-      function addChip(topic) {
-        const chip = document.createElement("div");
-        chip.className = "chip";
-        chip.innerHTML = `
-          ${topic}
-          <span class="remove" onclick="removeChip(this, '${topic}')">&times;</span>
-        `;
-        topicChipsContainer.appendChild(chip);
-      }
-
-      function removeChip(element, topic) {
-        element.parentElement.remove();
-        topics.delete(topic);
-      }
-    </script>
   </body>
 </html>
