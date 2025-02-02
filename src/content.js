@@ -6,14 +6,19 @@ style.textContent = `
     top: 20px;
     right: 20px;
     width: 300px;
-    background-color: #ffffff;
-    border: 2px solid var(--ft-primary-color);
+    background-color: #ffffff !important; /* Force white background */
+    border: 2px solid #b5838d !important; /* Use explicit color instead of var */
     border-radius: 5px;
     padding: 15px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 999999;
-    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif !important;
     animation: slideIn 0.3s ease-out;
+    color: #4a4a4a !important; /* Force text color */
+  }
+
+  .focus-notification * {
+    color: #4a4a4a !important; /* Force text color for all child elements */
   }
 
   .focus-notification-header {
@@ -25,21 +30,20 @@ style.textContent = `
 
   .focus-notification-title {
     font-weight: bold;
-    color: var(--ft-accent-color);
+    color: #23022e !important; /* Use explicit accent color */
     margin: 0;
   }
 
   .focus-notification-close {
     background: none;
     border: none;
-    color: var(--ft-text-color);
+    color: #4a4a4a !important;
     cursor: pointer;
     padding: 5px;
     font-size: 16px;
   }
 
   .focus-notification-content {
-    color: var(--ft-text-color);
     line-height: 1.4;
   }
 
@@ -48,16 +52,15 @@ style.textContent = `
     padding: 3px 8px;
     border-radius: 3px;
     margin-bottom: 8px;
+    color: white !important; /* Force white text for status */
   }
 
   .focus-status.focused {
-    background-color: #4caf50;
-    color: white;
+    background-color: #4caf50 !important;
   }
 
   .focus-status.distracted {
-    background-color: #f44336;
-    color: white;
+    background-color: #f44336 !important;
   }
 
   @keyframes slideIn {
@@ -117,17 +120,16 @@ const DISTRACTED_MESSAGES = {
 function getRandomMessage(isFocused) {
   const messageSet = isFocused ? FOCUSED_MESSAGES : DISTRACTED_MESSAGES;
   const raven = Math.random() < 0.5 ? "Hugin" : "Munin";
-  const messages = messageSet[raven];
-  const randomIndex = Math.floor(Math.random() * messages.length);
   return {
     raven,
-    message: messages[randomIndex],
+    message:
+      messageSet[raven][Math.floor(Math.random() * messageSet[raven].length)],
   };
 }
 
 // Function to create and show notification
 function showCustomNotification(data) {
-  const { domain, analysis } = data;
+  const { analysis } = data;
   const notification = document.createElement("div");
   notification.className = "focus-notification focus-extension";
 
@@ -148,10 +150,7 @@ function showCustomNotification(data) {
   `;
 
   // Remove existing notifications
-  const existingNotifications = document.querySelectorAll(
-    ".focus-notification"
-  );
-  existingNotifications.forEach((n) => n.remove());
+  document.querySelectorAll(".focus-notification").forEach((n) => n.remove());
 
   // Add notification to page
   document.body.appendChild(notification);

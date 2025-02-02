@@ -22,14 +22,22 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
-      // Get quiz questions from LLM
       const questions = await generateQuizQuestions(focusedSites);
-      console.log("Generated questions:", questions); // Debug log
+      displayQuestions(questions);
 
-      // Display questions
-      quizContent.innerHTML = questions
-        .map(
-          (q, i) => `
+      checkAnswersBtn.style.display = "block";
+      newQuizBtn.style.display = "block";
+    } catch (error) {
+      quizContent.innerHTML = `<p>Error generating quiz: ${error.message}</p>`;
+    } finally {
+      loading.style.display = "none";
+    }
+  }
+
+  function displayQuestions(questions) {
+    quizContent.innerHTML = questions
+      .map(
+        (q, i) => `
         <div class="question" data-correct="${q.answer}">
           <h3>Question ${i + 1}</h3>
           <p>${q.question}</p>
@@ -48,17 +56,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           <div class="feedback" style="display: none;"></div>
         </div>
       `
-        )
-        .join("");
-
-      checkAnswersBtn.style.display = "block";
-      newQuizBtn.style.display = "block";
-    } catch (error) {
-      console.error("Quiz generation error:", error); // Debug log
-      quizContent.innerHTML = `<p>Error generating quiz: ${error.message}</p>`;
-    } finally {
-      loading.style.display = "none";
-    }
+      )
+      .join("");
   }
 
   async function generateQuizQuestions(focusedSites) {
@@ -68,12 +67,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     ]);
     if (!apiKey) throw new Error("API key not found");
 
-    // Select up to 10 random sites
     const selectedSites = focusedSites
       .sort(() => Math.random() - 0.5)
       .slice(0, 10);
 
-    const prompt = `You are a quiz generator. Create multiple choice questions based on the following content. 
+    const prompt = createQuizPrompt(selectedSites);
+
+    return modelName === "ChatGPT"
+      ? await generateChatGPTQuestions(prompt, apiKey)
+      : await generateGeminiQuestions(prompt, apiKey);
+  }
+
+  function createQuizPrompt(selectedSites) {
+    return `You are a quiz generator. Create multiple choice questions based on the following content. 
 Format your response as a valid JSON array where each question object has exactly these properties:
 - "question": the question text
 - "options": array of 4 possible answers
@@ -97,75 +103,67 @@ Content: ${site.content.substring(0, 200)}
 ---`
   )
   .join("\n")}`;
+  }
 
-    console.log("Using model:", modelName); // Debug log
+  async function generateChatGPTQuestions(prompt, apiKey) {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7,
+      }),
+    });
 
-    if (modelName === "ChatGPT") {
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [{ role: "user", content: prompt }],
-            temperature: 0.7,
-          }),
-        }
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        `API request failed: ${error.error?.message || response.statusText}`
       );
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("ChatGPT API error:", error); // Debug log
-        throw new Error(
-          `API request failed: ${error.error?.message || response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      return JSON.parse(data.choices[0].message.content);
-    } else {
-      // Gemini implementation
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-      try {
-        const result = await model.generateContent(prompt);
-        const response = result.response.text();
-        console.log("Raw Gemini response:", response); // Debug log
-
-        // Try to find JSON in the response
-        const jsonMatch = response.match(/\[[\s\S]*\]/);
-        if (!jsonMatch) {
-          throw new Error("No JSON array found in response");
-        }
-
-        const jsonStr = jsonMatch[0];
-        const parsed = JSON.parse(jsonStr);
-
-        // Validate the response format
-        if (!Array.isArray(parsed)) {
-          throw new Error("Response is not an array");
-        }
-
-        parsed.forEach((q, i) => {
-          if (!q.question || !Array.isArray(q.options) || !q.answer) {
-            throw new Error(`Question ${i + 1} is missing required properties`);
-          }
-          if (!q.options.includes(q.answer)) {
-            throw new Error(`Question ${i + 1} answer is not in options`);
-          }
-        });
-
-        return parsed;
-      } catch (e) {
-        console.error("Gemini parsing error:", e); // Debug log
-        throw new Error(`Failed to parse Gemini response: ${e.message}`);
-      }
     }
+
+    const data = await response.json();
+    return JSON.parse(data.choices[0].message.content);
+  }
+
+  async function generateGeminiQuestions(prompt, apiKey) {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    try {
+      const result = await model.generateContent(prompt);
+      const response = result.response.text();
+      const jsonMatch = response.match(/\[[\s\S]*\]/);
+
+      if (!jsonMatch) {
+        throw new Error("Invalid response format");
+      }
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      validateQuestions(parsed);
+      return parsed;
+    } catch (e) {
+      throw new Error("Failed to generate questions");
+    }
+  }
+
+  function validateQuestions(questions) {
+    if (!Array.isArray(questions)) {
+      throw new Error("Invalid response format");
+    }
+
+    questions.forEach((q, i) => {
+      if (!q.question || !Array.isArray(q.options) || !q.answer) {
+        throw new Error(`Invalid question format at position ${i + 1}`);
+      }
+      if (!q.options.includes(q.answer)) {
+        throw new Error(`Invalid answer for question ${i + 1}`);
+      }
+    });
   }
 
   checkAnswersBtn.addEventListener("click", () => {
@@ -196,7 +194,5 @@ Content: ${site.content.substring(0, 200)}
   });
 
   newQuizBtn.addEventListener("click", generateQuiz);
-
-  // Generate initial quiz
   generateQuiz();
 });

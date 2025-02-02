@@ -11,10 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const historyDiv = document.getElementById("focusHistory");
   const quizBtn = document.getElementById("quizBtn");
 
-  const MAX_STORED_SITES = 50; // Define the constant
+  const MAX_STORED_SITES = 50;
   let currentContent = "";
 
-  // Function to load and display focus history
   async function loadFocusHistory() {
     const data = await chrome.storage.local.get("focusedSites");
     const focusedSites = data.focusedSites || [];
@@ -46,27 +45,22 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // Load focus history when popup opens
   loadFocusHistory();
 
-  // Clear history button handler
   clearHistoryBtn.addEventListener("click", async () => {
     await chrome.storage.local.set({ focusedSites: [] });
     loadFocusHistory();
   });
 
-  // Check for automatic analysis results when popup opens
   chrome.storage.local.get(["lastAnalysis"], (data) => {
     if (data.lastAnalysis) {
       const { content, analysis, timestamp, url } = data.lastAnalysis;
-
-      // Show the automatically analyzed content
       currentContent = content;
       contentDiv.textContent = content;
-      const wordCount = content.trim().split(/\s+/).length;
-      wordCountDiv.textContent = `Word count: ${wordCount}`;
+      wordCountDiv.textContent = `Word count: ${
+        content.trim().split(/\s+/).length
+      }`;
 
-      // Show the analysis results
       analysisDiv.innerHTML = `
         <strong>Focus Analysis (Auto):</strong><br>
         URL: ${url}<br>
@@ -77,8 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       analyzeBtn.disabled = false;
-
-      // Refresh history when showing automatic analysis
       loadFocusHistory();
     }
   });
@@ -89,21 +81,20 @@ document.addEventListener("DOMContentLoaded", () => {
       currentWindow: true,
     });
 
-    // Show loading state
     contentDiv.textContent = "Extracting content...";
     analyzeBtn.disabled = true;
 
-    getJinaReaderContent(tab.url)
-      .then((content) => {
-        currentContent = content;
-        contentDiv.textContent = currentContent;
-        const wordCount = currentContent.trim().split(/\s+/).length;
-        wordCountDiv.textContent = `Word count: ${wordCount}`;
-        analyzeBtn.disabled = false;
-      })
-      .catch((reason) => {
-        contentDiv.textContent = reason || "Failed to extract content";
-      });
+    try {
+      const content = await getJinaReaderContent(tab.url);
+      currentContent = content;
+      contentDiv.textContent = content;
+      wordCountDiv.textContent = `Word count: ${
+        content.trim().split(/\s+/).length
+      }`;
+      analyzeBtn.disabled = false;
+    } catch (error) {
+      contentDiv.textContent = error.message || "Failed to extract content";
+    }
   });
 
   analyzeBtn.addEventListener("click", async () => {
@@ -114,20 +105,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     analysisDiv.textContent = "Analyzing...";
 
-    analyzePage(currentContent)
-      .then((response) => {
-        analysisDiv.innerHTML = `
+    try {
+      const response = await analyzePage(currentContent);
+      analysisDiv.innerHTML = `
         <strong>Focus Analysis (Manual):</strong><br>
         Is Focused: ${response.isFocused}<br>
         Reason: ${response.reason}<br>
         Topics: ${response.topics.join(", ")}
       `;
-        // Refresh history after manual analysis
-        loadFocusHistory();
-      })
-      .catch((reason) => {
-        analysisDiv.innerHTML = reason;
-      });
+      loadFocusHistory();
+    } catch (error) {
+      analysisDiv.innerHTML = error.message;
+    }
   });
 
   settingsBtn.addEventListener("click", () => {
