@@ -47,7 +47,7 @@ export function createNotification(
       }
 
       .focus-notification-time {
-        border-left: 4px solid var(--primary-color);
+        border-left: 4px solid var(--ft--primary-color);
       }
 
       .focus-notification-header {
