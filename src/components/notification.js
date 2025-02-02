@@ -1,9 +1,4 @@
-export function createNotification(
-  message,
-  onContinue,
-  onBack,
-  isTimeNotification = false,
-) {
+export function createNotification(message, isTimeNotification = false) {
   // Add styles if not already added
   if (!document.getElementById("focus-notification-styles")) {
     const style = document.createElement("style");
@@ -132,7 +127,6 @@ export function createNotification(
   notification
     .querySelector(".focus-notification-continue")
     .addEventListener("click", () => {
-      onContinue?.();
       notification.remove();
     });
 
@@ -141,7 +135,9 @@ export function createNotification(
     const backButton = notification.querySelector(".focus-notification-back");
     if (backButton) {
       backButton.addEventListener("click", () => {
-        onBack?.();
+        chrome.runtime.sendMessage(request, () => {
+          window.history.back();
+        });
         notification.remove();
       });
     }

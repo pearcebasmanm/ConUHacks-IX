@@ -1,6 +1,4 @@
-import { analyzePage } from "./analyze";
-
-import { BackgroundRequest, BackgroundResponse } from "./types";
+import { analyzePage, getJinaReaderContent } from "./analyze";
 
 document.addEventListener("DOMContentLoaded", () => {
   const extractBtn = document.getElementById("extractBtn");
@@ -22,19 +20,17 @@ document.addEventListener("DOMContentLoaded", () => {
     contentDiv.textContent = "Extracting content...";
     analyzeBtn.disabled = true;
 
-    const request = BackgroundRequest.createJinaRequest(tab.url);
-    chrome.runtime.sendMessage(request, (response) => {
-      if (response && response.success) {
-        currentContent = response.content;
+    getJinaReaderContent(tab.url)
+      .then((content) => {
+        currentContent = content;
         contentDiv.textContent = currentContent;
         const wordCount = currentContent.trim().split(/\s+/).length;
         wordCountDiv.textContent = `Word count: ${wordCount}`;
         analyzeBtn.disabled = false;
-      } else {
-        contentDiv.textContent = response.error || "Failed to extract content";
-        analyzeBtn.disabled = true;
-      }
-    });
+      })
+      .catch((reason) => {
+        contentDiv.textContent = reason || "Failed to extract content";
+      });
   });
 
   analyzeBtn.addEventListener("click", async () => {
@@ -45,52 +41,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     analysisDiv.textContent = "Analyzing...";
 
-    analyzePage(currentContent).then((response) => {
-      analysisDiv.innerHTML = `
+    analyzePage(currentContent)
+      .then((response) => {
+        analysisDiv.innerHTML = `
         <strong>Focus Analysis:</strong><br>
         Is Focused: ${response.isFocused}<br>
         Reason: ${response.reason}<br>
         Topics: ${response.topics.join(", ")}
       `;
-    });
+      })
+      .catch((reason) => {
+        analysisDiv.innerHTML = reason;
+      });
   });
 
   settingsBtn.addEventListener("click", () => {
     chrome.runtime.openOptionsPage();
-  });
-
-  // Add keyboard navigation and ARIA labels
-  extractBtn.setAttribute("aria-label", "Extract content from page");
-
-  analyzeBtn.setAttribute("aria-label", "Analyze extracted content");
-
-  // Add keyboard shortcuts
-  document.addEventListener("keydown", (e) => {
-    if (e.ctrlKey && e.key === "e") {
-      extractBtn.click();
-    } else if (e.ctrlKey && e.key === "a") {
-      analyzeBtn.click();
-    }
-  });
-
-  // Add listener for automatic analysis results
-  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "contentAnalyzed") {
-      chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
-        if (tab.id === request.tabId) {
-          try {
-            const analysis = JSON.parse(request.analysis);
-            analysisDiv.innerHTML = `
-                <strong>Focus Analysis:</strong><br>
-                Is Focused: ${analysis.isFocused}<br>
-                Reason: ${analysis.reason}<br>
-                Topics: ${analysis.topics.join(", ")}
-              `;
-          } catch (e) {
-            analysisDiv.textContent = request.analysis;
-          }
-        }
-      });
-    }
   });
 });

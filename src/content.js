@@ -1,5 +1,4 @@
 import { createNotification } from "./components/notification";
-import { BackgroundRequest } from "./types";
 
 // Only keep notification-related functionality
 function showFocusNotification(analysis) {
@@ -10,24 +9,12 @@ function showFocusNotification(analysis) {
     `${analysis.reason}${
       analysis.timeSpent ? ` (${analysis.timeSpent} seconds)` : "" // Changed to seconds for testing
     }`,
-    () => {
-      // Continue anyway
-      const request = BackgroundRequest.createNotificationResponse("continue");
-      chrome.runtime.sendMessage(request);
-    },
-    () => {
-      // Go back
-      const request = BackgroundRequest.createNotificationResponse("back");
-      chrome.runtime.sendMessage(request, () => {
-        window.history.back();
-      });
-    },
-    isTimeNotification
+    isTimeNotification,
   );
 
   // Make sure any existing notifications are removed
   const existingNotifications = document.querySelectorAll(
-    ".focus-notification"
+    ".focus-notification",
   );
   existingNotifications.forEach((n) => n.remove());
 
@@ -35,7 +22,7 @@ function showFocusNotification(analysis) {
 }
 
 // Simplified message listener with debug logging
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
   try {
     if (request.action === "showNotification") {
       console.log("Received notification request:", request); // Debug log

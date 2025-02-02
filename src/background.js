@@ -40,42 +40,6 @@ setInterval(() => {
   });
 }, 5000);
 
-// Update the message listener to handle Jina content requests
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log(request);
-  if (request.action === "analyzeContent") {
-    analyzePage(request.content)
-      .then((analysis) =>
-        sendResponse(BackgroundResponse.createSuccess(analysis)),
-      )
-      .catch((error) =>
-        sendResponse(BackgroundResponse.createError(error.message)),
-      );
-    return true;
-  }
-
-  if (request.action === "getJinaContent") {
-    if (!isValidUrl(request.url)) {
-      sendResponse(BackgroundResponse.createError("Invalid URL"));
-      return true;
-    }
-
-    getJinaReaderContent(request.url)
-      .then((content) =>
-        sendResponse(BackgroundResponse.createSuccess(null, content)),
-      )
-      .catch((error) =>
-        sendResponse(BackgroundResponse.createError(error.message)),
-      );
-    return true;
-  }
-
-  if (request.action === "notificationResponse") {
-    console.log("User response to notification:", request.response);
-    sendResponse(BackgroundResponse.createSuccess());
-  }
-});
-
 // Update the tab listener to handle both initial and time notifications
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url && isValidUrl(tab.url)) {
@@ -101,7 +65,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 });
 
 // Helper function to validate URLs
-function isValidUrl(url) {
+export function isValidUrl(url) {
   try {
     const urlObj = new URL(url);
     return (
