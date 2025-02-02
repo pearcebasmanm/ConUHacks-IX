@@ -1,11 +1,9 @@
 import { BackgroundResponse } from "./types";
 import { analyze } from "./analyze";
 
-// Keep track of analyzed domains
-const analyzedDomains = new Set();
-// Keep track of current request
+// Keep track of the last domain for each tab
+const tabDomains = new Map();
 let currentController = null;
-
 const MAX_STORED_SITES = 50;
 
 function getDomain(url) {
@@ -46,21 +44,45 @@ async function storeFocusedContent(url, content, analysis) {
 
 // Listen for tab updates
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  console.log(`Tab ${tabId} updated:`, {
+    status: changeInfo.status,
+    isActive: tab.active,
+    url: tab.url,
+    isValidUrl: isValidUrl(tab.url),
+  });
+
   if (changeInfo.status === "complete" && tab.active && isValidUrl(tab.url)) {
-    const domain = getDomain(tab.url);
-    if (domain && !analyzedDomains.has(domain)) {
-      // Cancel any pending request
+    const currentDomain = getDomain(tab.url);
+    const lastDomain = tabDomains.get(tabId);
+
+    console.log("Domain check:", {
+      tabId,
+      currentDomain,
+      lastDomain,
+      isDifferentDomain: currentDomain !== lastDomain,
+    });
+
+    // Only analyze if we're on a new domain for this tab
+    if (currentDomain && currentDomain !== lastDomain) {
+      console.log(`Tab ${tabId} switched to new domain:`, currentDomain);
+
+      // Cancel any ongoing analysis
       if (currentController) {
+        console.log("Cancelling previous analysis");
         currentController.abort();
       }
 
-      // Create new controller for this request
+      // Create new controller for this analysis
       currentController = new AbortController();
 
-      analyzedDomains.add(domain);
       try {
         const analysis = await analyze(tab.url, currentController.signal);
-        // Store the results for the popup
+        console.log("Analysis completed:", analysis);
+
+        // Update last analyzed domain for this tab
+        tabDomains.set(tabId, currentDomain);
+
+        // Store the results
         await chrome.storage.local.set({
           lastAnalysis: {
             url: tab.url,
@@ -70,24 +92,35 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           },
         });
 
-        // Store focused content
         await storeFocusedContent(tab.url, analysis.content, analysis.analysis);
 
-        // Send message to content script to show notification
+        // Show notification
         chrome.tabs.sendMessage(tabId, {
           type: "showNotification",
           data: {
-            domain,
+            domain: currentDomain,
             analysis: analysis.analysis,
           },
         });
       } catch (error) {
         if (error.name !== "AbortError") {
-          analyzedDomains.delete(domain);
+          console.error("Analysis failed:", {
+            error: error.message,
+            url: tab.url,
+            domain: currentDomain,
+          });
         }
       } finally {
-        currentController = null;
+        if (currentController.signal.aborted) {
+          currentController = null;
+        }
       }
     }
   }
+});
+
+// Clean up when a tab is closed
+chrome.tabs.onRemoved.addListener((tabId) => {
+  console.log(`Tab ${tabId} closed, cleaning up state`);
+  tabDomains.delete(tabId);
 });

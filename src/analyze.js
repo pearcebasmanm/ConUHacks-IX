@@ -9,46 +9,82 @@ export async function analyze(url, signal) {
 }
 
 export async function getJinaReaderContent(url, signal) {
+  console.log("Attempting content extraction for:", url);
+
   if (!isValidUrl(url)) {
+    console.warn("Invalid URL detected:", url);
     throw new Error("Invalid URL");
   }
 
   const jinaUrl = `https://r.jina.ai/${url}`;
-  const response = await fetch(jinaUrl, {
-    headers: {
-      Accept: "text/plain",
-      "Accept-Language": "en-US,en;q=0.5",
-    },
-    signal,
-  });
+  console.log("Fetching from Jina Reader:", jinaUrl);
 
-  if (!response.ok) {
-    throw new Error(`Jina Reader request failed: ${response.status}`);
+  try {
+    const response = await fetch(jinaUrl, {
+      headers: {
+        Accept: "text/plain",
+        "Accept-Language": "en-US,en;q=0.5",
+      },
+      signal,
+    });
+
+    if (!response.ok) {
+      console.error("Jina Reader request failed:", {
+        status: response.status,
+        statusText: response.statusText,
+        url: jinaUrl,
+      });
+      throw new Error(`Jina Reader request failed: ${response.status}`);
+    }
+
+    const text = await response.text();
+    console.log("Raw content length:", text.length);
+
+    const cleanText = text
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+      .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    console.log("Cleaned content length:", cleanText.length);
+
+    if (!cleanText || cleanText.length < 100) {
+      console.warn("Insufficient content:", {
+        length: cleanText.length,
+        preview: cleanText.substring(0, 100),
+      });
+      throw new Error("Insufficient content from Jina Reader");
+    }
+
+    return cleanText;
+  } catch (error) {
+    console.error("Content extraction failed:", {
+      error: error.message,
+      url: url,
+    });
+    throw error;
   }
-
-  const text = await response.text();
-  const cleanText = text
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!cleanText || cleanText.length < 100) {
-    throw new Error("Insufficient content from Jina Reader");
-  }
-
-  return cleanText;
 }
 
 export async function analyzePage(content, signal) {
+  console.log("Starting content analysis");
+
   const { modelName, apiKey, focusTopics } = await chrome.storage.sync.get([
     "modelName",
     "apiKey",
     "focusTopics",
   ]);
 
+  console.log("Analysis configuration:", {
+    model: modelName ?? "Gemini",
+    hasFocusTopics: !!focusTopics,
+    hasApiKey: !!apiKey,
+    contentLength: content.length,
+  });
+
   if (!apiKey) {
+    console.error("Missing API key in settings");
     throw new Error("Missing API Key");
   }
 
