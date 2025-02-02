@@ -11,25 +11,18 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("list");
 
   // Load saved settings
-  chrome.storage.sync.get(
-    ["modelName", "apiKey", "apiEndpoint", "focusTopics"],
-    (data) => {
-      if (data.modelName) {
-        document.getElementById("modelName").value = data.modelName;
-      }
-      if (data.apiKey) {
-        document.getElementById("apiKey").value = data.apiKey;
-      }
-      if (data.apiEndpoint) {
-        document.getElementById("apiEndpoint").value =
-          data.apiEndpoint ?? "https://api.openai.com/v1/chat/completions";
-      }
-      if (data.focusTopics) {
-        topics = data.focusTopics;
-      }
-      updateChips();
-    },
-  );
+  chrome.storage.sync.get(["modelName", "apiKey", "focusTopics"], (data) => {
+    if (data.modelName) {
+      document.getElementById("modelName").value = data.modelName;
+    }
+    if (data.apiKey) {
+      document.getElementById("apiKey").value = data.apiKey;
+    }
+    if (data.focusTopics) {
+      topics = data.focusTopics;
+    }
+    updateChips();
+  });
 
   focusTopics.addEventListener("keypress", function (e) {
     if (e.key !== "Enter") {
@@ -76,12 +69,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("save").addEventListener("click", () => {
     const modelName = document.getElementById("modelName").value;
     const apiKey = document.getElementById("apiKey").value.trim();
-    const apiEndpoint = document.getElementById("apiEndpoint").value.trim();
     const basePrompt = generatePrompt(topics);
-    if (!apiEndpoint || !apiEndpoint.startsWith("http")) {
-      showStatus("Invalid API endpoint URL", true);
-      return;
-    }
 
     if (topics === 0) {
       showStatus("At least one focus topic is required!", true);
@@ -93,7 +81,6 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
         modelName,
         apiKey,
         basePrompt,
-        apiEndpoint,
         focusTopics: topics,
       },
       () => {

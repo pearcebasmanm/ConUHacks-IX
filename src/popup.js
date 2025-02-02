@@ -1,4 +1,4 @@
-import { analyzePage } from "./background";
+import { analyzePage } from "./analyze";
 
 import { BackgroundRequest, BackgroundResponse } from "./types";
 
@@ -46,13 +46,11 @@ document.addEventListener("DOMContentLoaded", () => {
     analysisDiv.textContent = "Analyzing...";
 
     analyzePage(currentContent).then((response) => {
-      const analysis = JSON.parse(response);
-      alert(analysis);
       analysisDiv.innerHTML = `
         <strong>Focus Analysis:</strong><br>
-        Is Focused: ${analysis.isFocused}<br>
-        Reason: ${analysis.reason}<br>
-        Topics: ${analysis.topics.join(", ")}
+        Is Focused: ${response.isFocused}<br>
+        Reason: ${response.reason}<br>
+        Topics: ${response.topics.join(", ")}
       `;
     });
   });
