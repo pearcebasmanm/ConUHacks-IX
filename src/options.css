@@ -3,8 +3,8 @@ body {
     width: 400px;
     padding: 20px;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--background-color);
-    color: var(--text-color);
+    background-color: var(--ft-background-color);
+    color: var(--ft-text-color);
     line-height: 1.6;
 }
 
@@ -58,7 +58,7 @@ ul {
 
 li {
     display: inline-block;
-    background: var(--primary-color);
+    background: var(--ft-primary-color);
     color: white;
     padding: 3px 5px 3px 10px;
     border-radius: 15px;
@@ -71,7 +71,7 @@ li:hover {
 }
 
 a {
-    color: var(--text-color);
+    color: var(--ft-text-color);
     text-decoration: none;
     margin-left: 5px;
     font-size: 10px;

@@ -21,7 +21,7 @@ button {
 }
 #settings {
     float: right;
-    background-color: var(--accent-color);
+    background-color: var(--ft-accent-color);
     border: 2px solid black;
 }
 #settings:hover {
