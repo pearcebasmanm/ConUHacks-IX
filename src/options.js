@@ -7,100 +7,71 @@ function updatePrompt() {
 }
 
 const basePrompt = document.addEventListener("DOMContentLoaded", () => {
-  const focusTopics = document.getElementById("focusTopics");
+  const modelSelect = document.getElementById("modelName");
+  const apiKeyInput = document.getElementById("apiKey");
+  const focusTopicsInput = document.getElementById("focusTopics");
+  const saveButton = document.getElementById("save");
+  const statusDiv = document.getElementById("status");
   const list = document.getElementById("list");
 
   // Load saved settings
   chrome.storage.sync.get(["modelName", "apiKey", "focusTopics"], (data) => {
-    if (data.modelName) {
-      document.getElementById("modelName").value = data.modelName;
-    }
-    if (data.apiKey) {
-      document.getElementById("apiKey").value = data.apiKey;
-    }
-    if (data.focusTopics) {
-      topics = data.focusTopics;
-    }
-    updateChips();
+    if (data.modelName) modelSelect.value = data.modelName;
+    if (data.apiKey) apiKeyInput.value = data.apiKey;
+    if (data.focusTopics) renderTopics(data.focusTopics);
   });
 
-  focusTopics.addEventListener("keypress", function (e) {
-    if (e.key !== "Enter") {
-      return;
-    }
-    let val = focusTopics.value.trim();
-    if (val === "") {
-      alert("Please type a tag Name");
-      return;
-    }
-    if (topics.indexOf(val) >= 0) {
-      alert("Tag name is a duplicate");
-      return;
-    }
-
-    topics.push(val);
-    updateChips();
-    focusTopics.value = "";
-    focusTopics.focus();
-  });
-
-  function updateChips() {
+  function renderTopics(topics) {
     list.innerHTML = topics
-      .map(
-        (item, index) =>
-          `<li id="chip-item-${item}"><span>${item}</span><a><strong>X</strong></a></li>`,
-      )
+      .map((topic) => `<li>${topic}<button>×</button></li>`)
       .join("");
 
-    for (const [i, item] of topics.entries()) {
-      document
-        .getElementById(`chip-item-${item}`)
-        .addEventListener("click", () => {
-          topics = topics.filter((item) => topics.indexOf(item) != i);
-          updateChips();
+    // Add click handlers to remove buttons
+    list.querySelectorAll("button").forEach((button, index) => {
+      button.addEventListener("click", () => {
+        chrome.storage.sync.get(["focusTopics"], (data) => {
+          const updatedTopics = data.focusTopics.filter((_, i) => i !== index);
+          chrome.storage.sync.set({ focusTopics: updatedTopics }, () => {
+            renderTopics(updatedTopics);
+          });
         });
-    }
-
-    // for debugging purposes
-    updatePrompt();
+      });
+    });
   }
 
-  // Save settings
-  document.getElementById("save").addEventListener("click", () => {
-    const modelName = document.getElementById("modelName").value;
-    const apiKey = document.getElementById("apiKey").value.trim();
-    const basePrompt = generatePrompt(topics);
+  // Handle adding new topics
+  focusTopicsInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter" && focusTopicsInput.value.trim()) {
+      chrome.storage.sync.get(["focusTopics"], (data) => {
+        const topics = data.focusTopics || [];
+        const newTopic = focusTopicsInput.value.trim();
 
-    if (topics === 0) {
-      showStatus("At least one focus topic is required!", true);
-      return;
+        if (!topics.includes(newTopic)) {
+          const updatedTopics = [...topics, newTopic];
+          chrome.storage.sync.set({ focusTopics: updatedTopics }, () => {
+            renderTopics(updatedTopics);
+            focusTopicsInput.value = ""; // Clear the input field
+          });
+        }
+      });
     }
-
-    chrome.storage.sync.set(
-      {
-        modelName,
-        apiKey,
-        basePrompt,
-        focusTopics: topics,
-      },
-      () => {
-        showStatus("Settings saved successfully!");
-        // Verify the save
-        chrome.storage.sync.get(["apiKey"], (data) => {
-          if (data.apiKey !== apiKey) {
-            showStatus("Warning: Settings may not have saved correctly", true);
-          }
-        });
-      },
-    );
   });
 
-  function showStatus(message, isError = false) {
-    const status = document.getElementById("status");
-    status.textContent = message;
-    status.style.color = isError ? "red" : "green";
-    setTimeout(() => {
-      status.textContent = "";
-    }, 3000);
-  }
+  // Save settings
+  saveButton.addEventListener("click", () => {
+    chrome.storage.sync.set(
+      {
+        modelName: modelSelect.value,
+        apiKey: apiKeyInput.value,
+      },
+      () => {
+        statusDiv.textContent = "Settings saved!";
+        statusDiv.className = "success";
+        setTimeout(() => {
+          statusDiv.textContent = "";
+          statusDiv.className = "";
+        }, 2000);
+      }
+    );
+  });
 });

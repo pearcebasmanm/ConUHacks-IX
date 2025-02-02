@@ -88,7 +88,7 @@ Format your response as a valid JSON array where each question object has exactl
 Example format:
 [
   {
-    "question": "What is the main topic discussed?",
+    "question": "[insert question here?]",
     "options": ["Option A", "Option B", "Option C", "Option D"],
     "answer": "Option A"
   }
