@@ -37,18 +37,6 @@ small {
     color: #4caf50;
 }
 
-main {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    bottom: 0px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-}
-
 ul {
     list-style: none;
     margin: 0px;
@@ -64,10 +52,6 @@ li {
     border-radius: 15px;
     margin-right: 5px;
     margin-bottom: 5px;
-}
-
-li:hover {
-    cursor: pointer;
 }
 
 a {

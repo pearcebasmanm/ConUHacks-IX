@@ -21,6 +21,10 @@
     background-color: var(--ft-accent-color);
 }
 
+.ft-chip {
+    cursor: pointer;
+}
+
 .ft-chip:hover {
     background-color: red;
 }

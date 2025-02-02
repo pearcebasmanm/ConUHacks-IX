@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const extractBtn = document.getElementById("extractBtn");
   const analyzeBtn = document.getElementById("analyzeBtn");
   const settingsBtn = document.getElementById("settingsBtn");
-  const contentDiv = document.getElementById("content");
-  const analysisDiv = document.getElementById("analysis");
+  const contentDiv = document.getElementById("ft-content-summary");
+  const analysisDiv = document.getElementById("ft-ai-analysis");
   const wordCountDiv = document.getElementById("wordCount");
 
   let currentContent = "";
@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
   });
 
-  analyzeBtn.addEventListener("click", async () => {
+  analyzeBtn.addEventListener("click", () => {
     if (!currentContent) {
       analysisDiv.textContent = "Please extract content first";
       return;

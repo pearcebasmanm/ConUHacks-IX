@@ -1,4 +1,5 @@
 import { TabTimer } from "./TabTimer";
+import { showNotification } from "./notification";
 
 function getDomain(url) {
   try {
@@ -26,14 +27,10 @@ setInterval(() => {
       // Show notifications for active tab if any
       notifications.forEach((notification) => {
         console.log("Sending notification:", notification);
-        chrome.tabs.sendMessage(activeTab.id, {
-          action: "showNotification",
-          analysis: {
-            topics: ["Time Alert"],
-            reason: notification.message,
-            timeSpent: notification.timeSpent,
-          },
-        });
+        showNotification(0);
+        // {
+        //   timeSpent: notification.timeSpent,
+        // }
       });
     }
   });
@@ -51,12 +48,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
       if (AUTO_ANALYZE) {
         // Show initial domain notification
-        mockAnalysis().then((analysis) => {
-          const parsedAnalysis = JSON.parse(analysis);
-          chrome.tabs.sendMessage(tabId, {
-            action: "showNotification",
-            analysis: parsedAnalysis,
-          });
+        analyse().then((response) => {
+          if (!response.isFocused) {
+            showNotification(0);
+          }
         });
       }
     }
@@ -91,14 +86,15 @@ chrome.tabs.onActivated.addListener(({ tabId }) => {
         tabTimer.updateLastActiveTime(tabId);
         const pendingNotification = tabTimer.checkPendingNotifications(tabId);
         if (pendingNotification) {
-          chrome.tabs.sendMessage(tabId, {
-            action: "showNotification",
-            analysis: {
-              topics: ["Time Alert"],
-              reason: pendingNotification.message,
-              timeSpent: pendingNotification.timeSpent,
-            },
-          });
+          showNotification(0);
+          // chrome.tabs.sendMessage(tabId, {
+          //   action: "showNotification",
+          //   analysis: {
+          //     topics: ["Time Alert"],
+          //     reason: pendingNotification.message,
+          //     timeSpent: pendingNotification.timeSpent,
+          //   },
+          // });
         }
       }
     }

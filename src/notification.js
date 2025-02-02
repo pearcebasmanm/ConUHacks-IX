@@ -1,4 +1,17 @@
-export function createNotification(message, isTimeNotification = false) {
+import { messages } from "./messages";
+
+export function showNotification(count) {
+  const isInitial = count == 0;
+  const possibleMessages = messages[count];
+  const message =
+    possibleMessages[Math.floor(Math.random() * possibleMessages.length)];
+  createNotification(message, isInitial);
+}
+
+function createNotification(message, isInitial = false) {
+  // There shall be only one !!!
+  document.querySelectorAll(".focus-notification").forEach((n) => n.remove());
+
   // Add styles if not already added
   if (!document.getElementById("focus-notification-styles")) {
     const style = document.createElement("style");
@@ -39,10 +52,6 @@ export function createNotification(message, isTimeNotification = false) {
         z-index: 10000;
         max-width: 400px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      }
-
-      .focus-notification-time {
-        border-left: 4px solid var(--ft--primary-color);
       }
 
       .focus-notification-header {
@@ -93,27 +102,17 @@ export function createNotification(message, isTimeNotification = false) {
 
   // Create notification element
   const notification = document.createElement("div");
-  notification.className = `focus-notification ${
-    isTimeNotification ? "focus-notification-time" : ""
-  }`;
+  notification.className = `focus-notification`;
 
   notification.innerHTML = `
     <div class="focus-notification-header">
-      <div class="focus-notification-title">${
-        isTimeNotification ? "Time Alert" : "Focus Alert"
-      }</div>
+      <div class="focus-notification-title">Focus Alert</div>
       <button class="focus-notification-close">&times;</button>
     </div>
     <div class="focus-notification-message">${message}</div>
     <div class="focus-notification-buttons">
-      <button class="focus-notification-continue">
-        ${isTimeNotification ? "Acknowledge" : "Continue Anyway"}
-      </button>
-      ${
-        !isTimeNotification
-          ? `<button class="focus-notification-back">Go Back</button>`
-          : ""
-      }
+      <button class="focus-notification-continue">Continue Anyway</button>
+      ${isInitial && `<button class="focus-notification-back">Go Back</button>`}
     </div>
   `;
 
@@ -131,17 +130,16 @@ export function createNotification(message, isTimeNotification = false) {
     });
 
   // Only add back button listener if it's not a time notification
-  if (!isTimeNotification) {
-    const backButton = notification.querySelector(".focus-notification-back");
-    if (backButton) {
-      backButton.addEventListener("click", () => {
+  if (isInitial) {
+    notification
+      .querySelector(".focus-notification-back")
+      .addEventListener("click", () => {
         chrome.runtime.sendMessage(request, () => {
           window.history.back();
         });
         notification.remove();
       });
-    }
   }
 
-  return notification;
+  document.body.appendChild(notification);
 }

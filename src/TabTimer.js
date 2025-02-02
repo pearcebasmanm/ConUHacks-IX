@@ -111,7 +111,7 @@ export class TabTimer {
         });
         console.log(
           "- Queued notification:",
-          notifications[notifications.length - 1]
+          notifications[notifications.length - 1],
         );
       }
     }
