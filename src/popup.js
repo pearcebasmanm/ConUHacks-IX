@@ -1,3 +1,5 @@
+import { analyzePage } from "./background";
+
 import { BackgroundRequest, BackgroundResponse } from "./types";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,25 +44,29 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     analysisDiv.textContent = "Analyzing...";
-    const request = BackgroundRequest.createAnalyzeRequest(currentContent);
 
-    chrome.runtime.sendMessage(request, (response) => {
-      if (response.success) {
-        try {
-          const analysis = JSON.parse(response.analysis);
-          analysisDiv.innerHTML = `
-            <strong>Focus Analysis:</strong><br>
-            Is Focused: ${analysis.isFocused}<br>
-            Reason: ${analysis.reason}<br>
-            Topics: ${analysis.topics.join(", ")}
-          `;
-        } catch (e) {
-          analysisDiv.textContent = response.analysis;
-        }
-      } else {
-        analysisDiv.innerHTML = `<span class="error">Analysis failed: ${response.error}</span>`;
-      }
+    analyzePage(currentContent).then((response) => {
+      alert(response);
     });
+
+    // const request = BackgroundRequest.createAnalyzeRequest(currentContent);
+    // chrome.runtime.sendMessage(request, (response) => {
+    //   if (response.success) {
+    //     try {
+    //       const analysis = JSON.parse(response.analysis);
+    //       analysisDiv.innerHTML = `
+    //         <strong>Focus Analysis:</strong><br>
+    //         Is Focused: ${analysis.isFocused}<br>
+    //         Reason: ${analysis.reason}<br>
+    //         Topics: ${analysis.topics.join(", ")}
+    //       `;
+    //     } catch (e) {
+    //       analysisDiv.textContent = response.analysis;
+    //     }
+    //   } else {
+    //     analysisDiv.innerHTML = `<span class="error">Analysis failed: ${response.error}</span>`;
+    //   }
+    // });
   });
 
   settingsBtn.addEventListener("click", () => {
