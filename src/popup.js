@@ -10,6 +10,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let currentContent = "";
 
+  // Check for automatic analysis results when popup opens
+  chrome.storage.local.get(["lastAnalysis"], (data) => {
+    if (data.lastAnalysis) {
+      const { content, analysis, timestamp, url } = data.lastAnalysis;
+
+      // Show the automatically analyzed content
+      currentContent = content;
+      contentDiv.textContent = content;
+      const wordCount = content.trim().split(/\s+/).length;
+      wordCountDiv.textContent = `Word count: ${wordCount}`;
+
+      // Show the analysis results
+      analysisDiv.innerHTML = `
+        <strong>Focus Analysis (Auto):</strong><br>
+        URL: ${url}<br>
+        Time: ${new Date(timestamp).toLocaleTimeString()}<br>
+        Is Focused: ${analysis.isFocused}<br>
+        Reason: ${analysis.reason}<br>
+        Topics: ${analysis.topics.join(", ")}
+      `;
+
+      analyzeBtn.disabled = false;
+    }
+  });
+
   extractBtn.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({
       active: true,
@@ -44,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     analyzePage(currentContent)
       .then((response) => {
         analysisDiv.innerHTML = `
-        <strong>Focus Analysis:</strong><br>
+        <strong>Focus Analysis (Manual):</strong><br>
         Is Focused: ${response.isFocused}<br>
         Reason: ${response.reason}<br>
         Topics: ${response.topics.join(", ")}

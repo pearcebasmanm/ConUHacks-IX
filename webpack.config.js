@@ -8,6 +8,7 @@ module.exports = {
     popup: "./src/popup.js",
     types: "./src/types.js",
     options: "./src/options.js",
+    analyze: "./src/analyze.js",
   },
   output: {
     filename: "[name].js", // Produces dist/background.js, dist/content.js, etc.

@@ -4,8 +4,11 @@ import { isValidUrl } from "./background";
 
 export async function analyze(url) {
   const content = await getJinaReaderContent(url);
-  const response = await analyzePage(content);
-  return response;
+  const analysis = await analyzePage(content);
+  return {
+    content,
+    analysis,
+  };
 }
 
 // Update getJinaReaderContent function
@@ -102,12 +105,12 @@ export async function analyzePage(content) {
       alert(
         `API request failed: ${response.status} ${response.statusText}${
           errorData ? " - " + JSON.stringify(errorData) : ""
-        }`,
+        }`
       );
       throw new Error(
         `API request failed: ${response.status} ${response.statusText}${
           errorData ? " - " + JSON.stringify(errorData) : ""
-        }`,
+        }`
       );
     }
 
