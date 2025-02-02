@@ -80,29 +80,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function createQuizPrompt(selectedSites) {
     return `You are a quiz generator. Create multiple choice questions based on the following content. 
-Format your response as a valid JSON array where each question object has exactly these properties:
-- "question": the question text
-- "options": array of 4 possible answers
-- "answer": the correct answer (must be one of the options)
+    Format your response as a valid JSON array(without markdown) where each question object has exactly these properties:
+    - "question": the question text
+    - "options": array of 4 possible answers
+    - "answer": the correct answer (must be one of the options)
 
-Example format:
-[
-  {
-    "question": "[insert question here?]",
-    "options": ["Option A", "Option B", "Option C", "Option D"],
-    "answer": "Option A"
-  }
-]
+    Example format:
+    [
+      {
+        "question": "[insert question here?]",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "answer": "Option A"
+      }
+    ]
 
-Generate one question per topic from this content:
-${selectedSites
-  .map(
-    (site) => `
-Topic: ${site.analysis.topics.join(", ")}
-Content: ${site.content.substring(0, 200)}
----`
-  )
-  .join("\n")}`;
+    Generate one question per topic from this content, make sure to create questions that are relevant to the topics the user has chosen:
+    ${selectedSites
+      .map(
+        (site) => `
+    Topic: ${site.analysis.topics.join(", ")}
+    Content: ${site.content.substring(0, 200)}
+    ---`
+      )
+      .join("\n")}`;
   }
 
   async function generateChatGPTQuestions(prompt, apiKey) {

@@ -7,3 +7,6 @@ Prepend the base prompt to API call, Jaspreet, Working
 Send only the first 200 characters in the extracted propmt, Jaspreet, Working
 Create type name: BackgroundRequest which has fields: action <string>; url <string>; content <string> another object BackgroundResponse which has fields: success <boolean>; analysis <string>; content<string>; error <string>, David, na
 Work keeping the timer when switching back to a tab, David, na
+Additional guidelines in the base prompt to return the json without any markdown, Jaspreet, Done
+When we open a link in a new tab the extension doesn't show the pop, na, na
+If the extracted content just contains urls the quiz sometimes contains questions that asks about the url themselves instead of ignoring that stuff, na, na
