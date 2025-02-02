@@ -6,7 +6,7 @@
     --ft-background-color: #ffffff;
 }
 
-button {
+.ft-button {
     background-color: var(--ft-primary-color);
     color: white;
     border: none;
@@ -17,24 +17,15 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
+.ft-button:hover {
     background-color: var(--ft-accent-color);
 }
 
-li:hover {
+.ft-chip:hover {
     background-color: red;
 }
 
-input[type="text"],
-input[type="password"] {
-    width: 100%;
-}
-
-input[type="text"],
-input[type="password"],
-select,
-textarea,
-.container {
+.ft-container {
     padding: 10px;
     border: 2px solid var(--ft-primary-color);
     border-radius: 5px;
@@ -46,7 +37,7 @@ input[type="text"]:focus,
 input[type="password"]:focus,
 select:focus,
 textarea:focus,
-.container:focus,
+.ft-container:focus,
 .content:focus {
     outline: none;
     border-color: var(--ft-accent-color);

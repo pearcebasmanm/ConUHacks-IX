@@ -10,26 +10,28 @@
     <body>
         <div id="settings">
             <div class="form-group">
-                <label for="modelName">Model:</label>
-                <select id="modelName">
+                <label for="modelName" class="ft-label">Model:</label>
+                <select id="modelName" class="ft-container">
                     <option>Gemini</option>
                     <option>ChatGPT</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="apiKey">API Key:</label>
+                <label for="apiKey" class="ft-label">API Key:</label>
                 <input
                     type="password"
                     id="apiKey"
+                    class="ft-container"
                     placeholder="Enter your API key"
                 />
             </div>
             <div class="form-group">
-                <label for="focusTopics">Focus Topics</label>
+                <label for="focusTopics" class="ft-label">Focus Topics</label>
                 <div><ul id="list"></ul></div>
                 <input
                     type="text"
                     id="focusTopics"
+                    class="ft-container"
                     placeholder="type and Enter ..."
                 />
                 <small>
@@ -37,7 +39,7 @@
                     you know if you're getting distracted.
                 </small>
             </div>
-            <button id="save">Save Settings</button>
+            <button id="save" class="ft-button">Save Settings</button>
             <div id="status"></div>
             <p>Prompt for debugging:</p>
             <p id="basePrompt"></p>

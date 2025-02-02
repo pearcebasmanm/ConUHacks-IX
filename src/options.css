@@ -13,7 +13,7 @@ body {
     margin-bottom: 20px;
 }
 
-label {
+.ft-label {
     display: block;
     margin-bottom: 5px;
     font-weight: 600;

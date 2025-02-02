@@ -1,5 +1,5 @@
 body {
-    width: 400px;
+    width: 500px;
     padding: 10px;
     font-family: Arial, sans-serif;
 }
@@ -15,15 +15,10 @@ body {
     color: red;
     margin-top: 5px;
 }
-button {
-    margin: 5px;
-    padding: 5px 10px;
-}
-#settings {
-    float: right;
+
+#settingsBtn {
     background-color: var(--ft-accent-color);
-    border: 2px solid black;
 }
-#settings:hover {
+#settingsBtn:hover {
     background-color: black;
 }
