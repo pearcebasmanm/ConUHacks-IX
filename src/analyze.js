@@ -2,9 +2,9 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 import { generatePrompt, defaultTopics } from "./prompt";
 import { isValidUrl } from "./background";
 
-export async function analyze(url) {
-  const content = await getJinaReaderContent(url);
-  const analysis = await analyzePage(content);
+export async function analyze(url, signal) {
+  const content = await getJinaReaderContent(url, signal);
+  const analysis = await analyzePage(content, signal);
   return {
     content,
     analysis,
@@ -12,7 +12,7 @@ export async function analyze(url) {
 }
 
 // Update getJinaReaderContent function
-export async function getJinaReaderContent(url) {
+export async function getJinaReaderContent(url, signal) {
   if (!isValidUrl(url)) {
     throw new Error("Invalid URL");
   }
@@ -25,6 +25,7 @@ export async function getJinaReaderContent(url) {
       Accept: "text/plain",
       "Accept-Language": "en-US,en;q=0.5",
     },
+    signal,
   });
 
   if (!response.ok) {
@@ -52,7 +53,7 @@ export async function getJinaReaderContent(url) {
 // Toggle flag for automatic content analysis
 const AUTO_ANALYZE = false; // Set to true to enable automatic analysis
 
-export async function analyzePage(content) {
+export async function analyzePage(content, signal) {
   const { modelName, apiKey, focusTopics } = await chrome.storage.sync.get([
     "modelName",
     "apiKey",
@@ -70,8 +71,6 @@ export async function analyzePage(content) {
   const basePrompt = generatePrompt(focusTopics);
 
   if (modelName == "ChatGPT") {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
     const apiEndpoint = "https://api.openai.com/v1/chat/completions";
 
     console.log("Making API request to:", apiEndpoint);
@@ -95,18 +94,11 @@ export async function analyzePage(content) {
         ],
         temperature: 0.7,
       }),
-      signal: controller.signal,
+      signal,
     });
-
-    clearTimeout(timeout);
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
-      alert(
-        `API request failed: ${response.status} ${response.statusText}${
-          errorData ? " - " + JSON.stringify(errorData) : ""
-        }`
-      );
       throw new Error(
         `API request failed: ${response.status} ${response.statusText}${
           errorData ? " - " + JSON.stringify(errorData) : ""
@@ -120,6 +112,8 @@ export async function analyzePage(content) {
     const fullPrompt = `${basePrompt} ${content}`;
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    // Note: Gemini API might not support AbortController directly
     const result = await model.generateContent(fullPrompt);
 
     const markdownEnclosed = result.response.text();

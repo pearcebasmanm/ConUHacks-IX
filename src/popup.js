@@ -4,11 +4,56 @@ document.addEventListener("DOMContentLoaded", () => {
   const extractBtn = document.getElementById("extractBtn");
   const analyzeBtn = document.getElementById("analyzeBtn");
   const settingsBtn = document.getElementById("settings");
+  const clearHistoryBtn = document.getElementById("clearHistory");
   const contentDiv = document.getElementById("content");
   const analysisDiv = document.getElementById("analysis");
   const wordCountDiv = document.getElementById("wordCount");
+  const historyDiv = document.getElementById("focusHistory");
+  const quizBtn = document.getElementById("quizBtn");
 
+  const MAX_STORED_SITES = 50; // Define the constant
   let currentContent = "";
+
+  // Function to load and display focus history
+  async function loadFocusHistory() {
+    const data = await chrome.storage.local.get("focusedSites");
+    const focusedSites = data.focusedSites || [];
+
+    if (focusedSites.length === 0) {
+      historyDiv.innerHTML = "<p>No focused content stored yet.</p>";
+      return;
+    }
+
+    historyDiv.innerHTML = `
+      <h3>Recent Focused Content (${
+        focusedSites.length
+      }/${MAX_STORED_SITES})</h3>
+      <ul class="focus-history-list">
+        ${focusedSites
+          .map(
+            (site) => `
+          <li>
+            <strong>${site.domain}</strong>
+            <br>
+            <small>${new Date(site.timestamp).toLocaleString()}</small>
+            <br>
+            Topics: ${site.analysis.topics.join(", ")}
+          </li>
+        `
+          )
+          .join("")}
+      </ul>
+    `;
+  }
+
+  // Load focus history when popup opens
+  loadFocusHistory();
+
+  // Clear history button handler
+  clearHistoryBtn.addEventListener("click", async () => {
+    await chrome.storage.local.set({ focusedSites: [] });
+    loadFocusHistory();
+  });
 
   // Check for automatic analysis results when popup opens
   chrome.storage.local.get(["lastAnalysis"], (data) => {
@@ -32,6 +77,9 @@ document.addEventListener("DOMContentLoaded", () => {
       `;
 
       analyzeBtn.disabled = false;
+
+      // Refresh history when showing automatic analysis
+      loadFocusHistory();
     }
   });
 
@@ -74,6 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
         Reason: ${response.reason}<br>
         Topics: ${response.topics.join(", ")}
       `;
+        // Refresh history after manual analysis
+        loadFocusHistory();
       })
       .catch((reason) => {
         analysisDiv.innerHTML = reason;
@@ -82,5 +132,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   settingsBtn.addEventListener("click", () => {
     chrome.runtime.openOptionsPage();
+  });
+
+  quizBtn.addEventListener("click", () => {
+    chrome.windows.create({
+      url: "quiz.html",
+      type: "popup",
+      width: 800,
+      height: 600,
+    });
   });
 });

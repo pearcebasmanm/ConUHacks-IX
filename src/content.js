@@ -70,17 +70,70 @@ style.textContent = `
       opacity: 1;
     }
   }
+
+  @keyframes slideOut {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
 `;
 document.head.appendChild(style);
+
+// Add message collections
+const FOCUSED_MESSAGES = {
+  Hugin: [
+    "Thy focus illuminates the path of wisdom. Onward, seeker of knowledge!",
+    "A commendable journey, noble scholar. May your insights soar like the ravens at dawn.",
+    "Steady focus, brave mind. The realm of wisdom awaits thy curious gaze!",
+  ],
+  Munin: [
+    "Well done, clever mortal! Your focus is as sharp as Odin's spear!",
+    "Bravo! Your brain is a fortress of concentration—let the knowledge raid begin!",
+    "Look at you, slaying distractions like a true warrior of wit! Keep it up!",
+  ],
+};
+
+const DISTRACTED_MESSAGES = {
+  Hugin: [
+    "Hold, traveler! This land lies beyond your quest. Shall we return to our true mission?",
+    "A single step off the path leads to many. Is this truly where you wish to go?",
+    "Your quest lies elsewhere, yet here you stand. Shall we return before it is too late?",
+    "Stay the course, traveler! The wisdom you seek is not here.",
+  ],
+  Munin: [
+    "Ooooh, shiny! A great distraction you've found! Too bad it won't help you finish your work.",
+    "Oh wow, a totally urgent detour, I'm sure. What's next, scrolling ancient memes?",
+    "Distraction detected! I repeat, distraction detected! Just kidding… but seriously, get back to work.",
+    "Odin's wisdom? Nah. You're chasing cat videos instead.",
+  ],
+};
+
+// Helper function to get random message
+function getRandomMessage(isFocused) {
+  const messageSet = isFocused ? FOCUSED_MESSAGES : DISTRACTED_MESSAGES;
+  const raven = Math.random() < 0.5 ? "Hugin" : "Munin";
+  const messages = messageSet[raven];
+  const randomIndex = Math.floor(Math.random() * messages.length);
+  return {
+    raven,
+    message: messages[randomIndex],
+  };
+}
 
 // Function to create and show notification
 function showCustomNotification(data) {
   const { domain, analysis } = data;
   const notification = document.createElement("div");
-  notification.className = "focus-notification";
+  notification.className = "focus-notification focus-extension";
 
   const statusClass = analysis.isFocused ? "focused" : "distracted";
   const statusText = analysis.isFocused ? "✅ Focused" : "⚠️ Distracted";
+  const { raven, message } = getRandomMessage(analysis.isFocused);
 
   notification.innerHTML = `
     <div class="focus-notification-header">
@@ -89,9 +142,8 @@ function showCustomNotification(data) {
     </div>
     <div class="focus-notification-content">
       <div class="focus-status ${statusClass}">${statusText}</div>
-      <p><strong>Site:</strong> ${domain}</p>
       <p><strong>Reason:</strong> ${analysis.reason}</p>
-      <p><strong>Topics:</strong> ${analysis.topics.join(", ")}</p>
+      <p><strong>${raven} says:</strong> "${message}"</p>
     </div>
   `;
 
@@ -104,17 +156,12 @@ function showCustomNotification(data) {
   // Add notification to page
   document.body.appendChild(notification);
 
-  // Handle close button
+  // Handle close button with animation
   const closeBtn = notification.querySelector(".focus-notification-close");
-  closeBtn.addEventListener("click", () => notification.remove());
-
-  // Auto-remove after 10 seconds
-  setTimeout(() => {
-    if (notification.parentElement) {
-      notification.style.animation = "slideIn 0.3s ease-out reverse";
-      setTimeout(() => notification.remove(), 300);
-    }
-  }, 10000);
+  closeBtn.addEventListener("click", () => {
+    notification.style.animation = "slideOut 0.3s ease-in forwards";
+    setTimeout(() => notification.remove(), 300);
+  });
 }
 
 // Listen for messages from background script

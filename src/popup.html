@@ -1,18 +1,21 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-    <head>
-        <link rel="stylesheet" href="styles.css" />
-        <link rel="stylesheet" href="popup.css" />
-    </head>
-    <body>
-        <div>
-            <button id="extractBtn">Extract Content</button>
-            <button id="analyzeBtn">Analyze Content</button>
-            <button id="settings" aria-label="Open Settings">Settings</button>
-        </div>
-        <div id="wordCount"></div>
-        <div class="container" id="content"></div>
-        <div class="container" id="analysis"></div>
-        <script src="popup.js"></script>
-    </body>
+  <head>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body class="focus-extension">
+    <div>
+      <button id="extractBtn">Extract Content</button>
+      <button id="analyzeBtn">Analyze Content</button>
+      <button id="clearHistory">Clear History</button>
+      <button id="quizBtn">Generate Quiz</button>
+      <button id="settings" aria-label="Open Settings">Settings</button>
+    </div>
+    <div id="wordCount"></div>
+    <div class="container" id="content"></div>
+    <div class="container" id="analysis"></div>
+    <div class="container" id="focusHistory"></div>
+    <script src="popup.js"></script>
+  </body>
 </html>

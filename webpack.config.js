@@ -9,6 +9,7 @@ module.exports = {
     types: "./src/types.js",
     options: "./src/options.js",
     analyze: "./src/analyze.js",
+    quiz: "./src/quiz.js",
   },
   output: {
     filename: "[name].js", // Produces dist/background.js, dist/content.js, etc.
@@ -27,6 +28,8 @@ module.exports = {
         { from: "src/options.html", to: "options.html" },
         { from: "src/options.css", to: "options.css" },
         { from: "hugin_mugin_logo2.png", to: "hugin_mugin_logo2.png" },
+        { from: "src/quiz.html", to: "quiz.html" },
+        { from: "src/quiz.css", to: "quiz.css" },
       ],
     }),
   ],

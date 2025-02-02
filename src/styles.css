@@ -6,7 +6,8 @@
   --ft-background-color: #ffffff;
 }
 
-button {
+/* Scope button styles to our extension's classes */
+.focus-extension button {
   background-color: var(--ft-primary-color);
   color: white;
   border: none;
@@ -17,24 +18,24 @@ button {
   transition: background-color 0.3s ease;
 }
 
-button:hover {
+.focus-extension button:hover {
   background-color: var(--ft-accent-color);
 }
 
-li:hover {
+.focus-extension li:hover {
   background-color: red;
 }
 
-input[type="text"],
-input[type="password"] {
+.focus-extension input[type="text"],
+.focus-extension input[type="password"] {
   width: 100%;
 }
 
-input[type="text"],
-input[type="password"],
-select,
-textarea,
-.container {
+.focus-extension input[type="text"],
+.focus-extension input[type="password"],
+.focus-extension select,
+.focus-extension textarea,
+.focus-extension .container {
   padding: 10px;
   border: 2px solid var(--ft-primary-color);
   border-radius: 5px;
@@ -42,12 +43,12 @@ textarea,
   transition: border-color 0.3s ease;
 }
 
-input[type="text"]:focus,
-input[type="password"]:focus,
-select:focus,
-textarea:focus,
-.container:focus,
-.content:focus {
+.focus-extension input[type="text"]:focus,
+.focus-extension input[type="password"]:focus,
+.focus-extension select:focus,
+.focus-extension textarea:focus,
+.focus-extension .container:focus,
+.focus-extension .content:focus {
   outline: none;
   border-color: var(--ft-accent-color);
 }
