@@ -16,6 +16,9 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.21.0"
+    "@google/generative-ai": "^0.21.0",
+    "clean-webpack-plugin": "^4.0.0",
+    "html-webpack-plugin": "^5.6.3",
+    "mini-css-extract-plugin": "^2.9.2"
   }
 }

@@ -1,6 +1,15 @@
-import { analyzePage, getJinaReaderContent } from "./analyze";
+import { analyzePage, getJinaReaderContent } from "../util/analyze";
+
+// function getJinaReaderContent() {
+//   return null;
+// }
+// function analyze() {
+//   return null;
+// }
 
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("hiya");
+
   const extractBtn = document.getElementById("extractBtn");
   const analyzeBtn = document.getElementById("analyzeBtn");
   const settingsBtn = document.getElementById("settingsBtn");

@@ -1,4 +1,4 @@
-# Focus Content Extractor 1.0
+# Huginn & Muninn - Remove Distractions when Browsing
 
 ## Current Version:
 

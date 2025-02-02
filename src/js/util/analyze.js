@@ -1,6 +1,17 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 import { generatePrompt, defaultTopics } from "./prompt";
-import { isValidUrl } from "./background";
+
+export function isValidUrl(url) {
+  try {
+    const urlObj = new URL(url);
+    return (
+      ["http:", "https:"].includes(urlObj.protocol) &&
+      !url.startsWith("https://r.jina.ai/")
+    );
+  } catch {
+    return false;
+  }
+}
 
 export async function analyze(url) {
   const content = await getJinaReaderContent(url);

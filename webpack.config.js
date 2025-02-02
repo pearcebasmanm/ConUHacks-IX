@@ -1,31 +1,45 @@
 const path = require("path");
-const CopyPlugin = require("copy-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   entry: {
-    background: "./src/background.js",
-    popup: "./src/popup.js",
-    options: "./src/options.js",
-    notification: "./src/notification.js",
+    background: "./src/js/background.js",
+    notification: "./src/js/notification.js",
+    popup: "./src/js/popup/popup.js",
+    options: "./src/js/options/options.js",
   },
   output: {
-    filename: "[name].js", // Produces dist/background.js, dist/content.js, etc.
+    filename: "js/[name].js", // Produces dist/js/background.js, dist/js/popup.js, etc.
     path: path.resolve(__dirname, "dist"),
   },
   resolve: {
     extensions: [".js"],
   },
   plugins: [
-    new CopyPlugin({
+    new CleanWebpackPlugin(),
+    new CopyWebpackPlugin({
       patterns: [
-        { from: "manifest.json", to: "manifest.json" },
-        { from: "src/styles.css", to: "styles.css" },
-        { from: "src/popup.html", to: "popup.html" },
-        { from: "src/popup.css", to: "popup.css" },
-        { from: "src/options.html", to: "options.html" },
-        { from: "src/options.css", to: "options.css" },
-        { from: "hugin_mugin_logo2.png", to: "hugin_mugin_logo2.png" },
+        { from: "src/manifest.json", to: "" }, // Copy manifest
+        { from: "src/css/styles.css", to: "css" }, // Copy CSS
+        { from: "src/assets/hugin_mugin_logo2.png", to: "assets" },
       ],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/js/popup/popup.html",
+      filename: "popup/popup.html",
+      chunks: ["popup"],
+    }),
+    new HtmlWebpackPlugin({
+      template: "./src/js/options/options.html",
+      filename: "options/options.html",
+      chunks: ["options"],
+    }),
+    new MiniCssExtractPlugin({
+      // Configure CSS extraction
+      filename: "css/styles.css", // Output CSS file
     }),
   ],
 };

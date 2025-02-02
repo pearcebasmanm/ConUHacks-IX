@@ -1,14 +1,10 @@
-import { defaultTopics, generatePrompt } from "./prompt";
+import { defaultTopics, generatePrompt } from "../util/prompt";
 
 let topics = defaultTopics;
 
-function updatePrompt() {
-  document.getElementById("basePrompt").innerHTML = generatePrompt(topics);
-}
-
-const basePrompt = document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const focusTopics = document.getElementById("focusTopics");
-  const list = document.getElementById("list");
+  const list = document.getElementById("chip-list");
 
   // Load saved settings
   chrome.storage.sync.get(["modelName", "apiKey", "focusTopics"], (data) => {
@@ -48,7 +44,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = topics
       .map(
         (item, index) =>
-          `<li id="chip-item-${item}" class="ft-chip"><span>${item}</span><a><strong>X</strong></a></li>`,
+          `<li id="chip-item-${item}" class="ft-chip"><span>${item}</span><a class="ft-chip-x"><strong>X</strong></a></li>`,
       )
       .join("");
 
@@ -62,7 +58,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     }
 
     // for debugging purposes
-    updatePrompt();
+    document.getElementById("basePrompt").innerHTML = generatePrompt(topics);
   }
 
   // Save settings

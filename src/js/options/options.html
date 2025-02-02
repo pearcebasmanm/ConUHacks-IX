@@ -4,10 +4,20 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Extension Settings</title>
-        <link rel="stylesheet" href="styles.css" />
-        <link rel="stylesheet" href="options.css" />
+        <link rel="stylesheet" href="../css/styles.css" />
     </head>
-    <body>
+    <body
+        style="
+            margin: auto;
+            width: 400px;
+            padding: 20px;
+            font-family: &quot;Segoe UI&quot;, Tahoma, Geneva, Verdana,
+                sans-serif;
+            background-color: var(--ft-background-color);
+            color: var(--ft-text-color);
+            line-height: 1.6;
+        "
+    >
         <div id="settings">
             <div class="form-group">
                 <label for="modelName" class="ft-label">Model:</label>
@@ -27,14 +37,14 @@
             </div>
             <div class="form-group">
                 <label for="focusTopics" class="ft-label">Focus Topics</label>
-                <div><ul id="list"></ul></div>
+                <div><ul id="chip-list"></ul></div>
                 <input
                     type="text"
                     id="focusTopics"
                     class="ft-container"
                     placeholder="type and Enter ..."
                 />
-                <small>
+                <small class="ft-small-text">
                     These are the topics you would like to focus on. We will let
                     you know if you're getting distracted.
                 </small>
@@ -44,6 +54,6 @@
             <p>Prompt for debugging:</p>
             <p id="basePrompt"></p>
         </div>
-        <script src="options.js"></script>
+        <script src="../js/options.js" type="module"></script>
     </body>
 </html>

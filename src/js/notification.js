@@ -1,12 +1,18 @@
-import { messages } from "./messages";
+import { messages } from "./util/messages";
 
-export function showNotification(count) {
-  const isInitial = count == 0;
-  const possibleMessages = messages[count];
-  const message =
-    possibleMessages[Math.floor(Math.random() * possibleMessages.length)];
-  createNotification(message, isInitial);
-}
+console.log("hi ho!");
+
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  console.log(request);
+  if (request.action === "showNotification") {
+    const { magnitude } = request;
+    const isInitial = magnitude == 0;
+    const possibleMessages = messages[magnitude];
+    const message =
+      possibleMessages[Math.floor(Math.random() * possibleMessages.length)];
+    createNotification(message, isInitial);
+  }
+});
 
 function createNotification(message, isInitial = false) {
   // There shall be only one !!!
