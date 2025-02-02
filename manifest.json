@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Focus Content Extractor",
+  "name": "Huginn & Muninn - Remove Distractions when Browsing",
   "version": "1.0",
-  "description": "Extracts relevant content from web pages for focus monitoring",
+  "description": "Stay on track with web browsing with the help of Huginn and Muninn",
   "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": ["<all_urls>"],
   "background": {
@@ -17,7 +17,17 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Focus Content Extractor"
+    "default_title": "Focus Content Extractor",
+    "default_icon": {
+      "16": "hugin_mugin_logo2.png",
+      "48": "hugin_mugin_logo2.png",
+      "128": "hugin_mugin_logo2.png"
+    }
+  },
+  "icons": {
+    "16": "hugin_mugin_logo2.png",
+    "48": "hugin_mugin_logo2.png",
+    "128": "hugin_mugin_logo2.png"
   },
   "options_page": "options.html"
 }

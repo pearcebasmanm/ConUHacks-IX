@@ -25,6 +25,7 @@ module.exports = {
         { from: "src/popup.css", to: "popup.css" },
         { from: "src/options.html", to: "options.html" },
         { from: "src/options.css", to: "options.css" },
+        { from: "hugin_mugin_logo2.png", to: "hugin_mugin_logo2.png" },
       ],
     }),
   ],
