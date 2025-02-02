@@ -25,7 +25,6 @@ module.exports = {
         { from: "src/popup.css", to: "popup.css" },
         { from: "src/options.html", to: "options.html" },
         { from: "src/options.css", to: "options.css" },
-        { from: "src/components/notification.css", to: "notification.css" },
       ],
     }),
   ],

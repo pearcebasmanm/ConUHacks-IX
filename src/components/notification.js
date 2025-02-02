@@ -2,13 +2,36 @@ export function createNotification(
   message,
   onContinue,
   onBack,
-  isTimeNotification = false
+  isTimeNotification = false,
 ) {
   // Add styles if not already added
   if (!document.getElementById("focus-notification-styles")) {
     const style = document.createElement("style");
     style.id = "focus-notification-styles";
     style.textContent = `
+      :root {
+          --accent-color: #23022e;
+          --primary-color: #b5838d; /* Light Pink */
+          --secondary-color: #6d6875; /* Lavender */
+          --text-color: #4a4a4a;
+          --background-color: #ffffff;
+      }
+
+      button {
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 5px;
+          cursor: pointer;
+          font-size: 16px;
+          transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+          background-color: var(--accent-color);
+      }
+
       .focus-notification {
         position: fixed;
         top: 20px;
@@ -24,7 +47,7 @@ export function createNotification(
       }
 
       .focus-notification-time {
-        border-left: 4px solid #4CAF50;
+        border-left: 4px solid var(--primary-color);
       }
 
       .focus-notification-header {
@@ -61,24 +84,6 @@ export function createNotification(
         justify-content: flex-end;
       }
 
-      .focus-notification-button {
-        padding: 8px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background-color 0.2s;
-      }
-
-      .focus-notification-continue {
-        background-color: #4CAF50;
-        color: white;
-      }
-
-      .focus-notification-continue:hover {
-        background-color: #45a049;
-      }
-
       .focus-notification-back {
         background-color: #f44336;
         color: white;
@@ -106,12 +111,12 @@ export function createNotification(
     </div>
     <div class="focus-notification-message">${message}</div>
     <div class="focus-notification-buttons">
-      <button class="focus-notification-button focus-notification-continue">
+      <button class="focus-notification-continue">
         ${isTimeNotification ? "Acknowledge" : "Continue Anyway"}
       </button>
       ${
         !isTimeNotification
-          ? `<button class="focus-notification-button focus-notification-back">Go Back</button>`
+          ? `<button class="focus-notification-back">Go Back</button>`
           : ""
       }
     </div>

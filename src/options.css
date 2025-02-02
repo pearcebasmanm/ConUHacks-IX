@@ -24,12 +24,6 @@ textarea {
     resize: vertical;
 }
 
-.error {
-    color: #ff6b6b;
-    margin-top: 5px;
-    font-size: 14px;
-}
-
 small {
     display: block;
     margin-top: 5px;
