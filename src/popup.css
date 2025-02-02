@@ -3,22 +3,3 @@ body {
     padding: 10px;
     font-family: Arial, sans-serif;
 }
-#content,
-#analysis {
-    max-height: 200px;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-top: 10px;
-}
-.error {
-    color: red;
-    margin-top: 5px;
-}
-
-#settingsBtn {
-    background-color: var(--ft-accent-color);
-}
-#settingsBtn:hover {
-    background-color: black;
-}

@@ -42,3 +42,24 @@ textarea:focus,
     outline: none;
     border-color: var(--ft-accent-color);
 }
+
+#ft-content-summary,
+#ft-ai-analysis {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-top: 10px;
+}
+.ft-error {
+    color: red;
+    margin-top: 5px;
+}
+
+#settingsBtn {
+    float: right;
+    background-color: var(--ft-accent-color);
+}
+#settingsBtn:hover {
+    background-color: black;
+}

@@ -3,7 +3,7 @@ import { analyzePage, getJinaReaderContent } from "./analyze";
 document.addEventListener("DOMContentLoaded", () => {
   const extractBtn = document.getElementById("extractBtn");
   const analyzeBtn = document.getElementById("analyzeBtn");
-  const settingsBtn = document.getElementById("settings");
+  const settingsBtn = document.getElementById("settingsBtn");
   const contentDiv = document.getElementById("content");
   const analysisDiv = document.getElementById("analysis");
   const wordCountDiv = document.getElementById("wordCount");
