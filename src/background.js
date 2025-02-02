@@ -1,5 +1,4 @@
 import { TabTimer } from "./TabTimer";
-import { BackgroundResponse } from "./types";
 
 function getDomain(url) {
   try {
