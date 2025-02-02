@@ -1,16 +1,12 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 import { TabTimer } from "./TabTimer";
 import { BackgroundResponse } from "./types";
+import { generatePrompt, defaultTopics } from "./prompt";
 
 async function analyzeGemini(prompt, apiKey, geminiModelName) {
-  alert("1");
   const genAI = new GoogleGenerativeAI(apiKey);
-  alert("2");
   const model = genAI.getGenerativeModel({ model: geminiModelName });
-  alert("3");
-
   const result = await model.generateContent(prompt);
-  alert("4");
   console.log(result);
   console.log(result.response.text());
   return result.response.text();
@@ -19,36 +15,38 @@ async function analyzeGemini(prompt, apiKey, geminiModelName) {
 // Toggle flag for automatic content analysis
 const AUTO_ANALYZE = false; // Set to true to enable automatic analysis
 
-// Temporary function for testing - always returns unfocused
-// async function mockAnalysis() {
-//   return JSON.stringify({
-//     isFocused: false,
-//     reason: "Initial visit notification", // Changed to be more clear this is initial
-//     topics: ["Domain Change"], // Changed to indicate this is domain-based
-//   });
-// }
-
 export async function analyzePage(content) {
   try {
-    const { modelName, apiKey, basePrompt, apiEndpoint } =
+    const { modelName, apiKey, apiEndpoint, focusTopics } =
       await chrome.storage.sync.get([
         "modelName",
         "apiKey",
-        "basePrompt",
         "apiEndpoint",
+        "focusTopics",
       ]);
 
-    if (modelName == "Gemini") {
-      const fullPrompt = `${basePrompt} ${content.substring(0, 200)}`; // only prompt with the first 200 hundred characters even if it halves.
-      alert("hello?");
-      return analyzeGemini(fullPrompt, geminiKey, "gemini-1.5-flash");
-    } else if (modelName == "ChatGPT") {
-      if (!apiKey || !basePrompt || !apiEndpoint) {
-        throw new Error("Missing required configuration");
-      }
+    if (typeof content !== "string") {
+      throw new Error("Invalid content format");
+    }
+    if (!apiKey) {
+      throw new Error("Missing api Key");
+    }
 
-      if (typeof content !== "string" || content.length > 10000) {
-        throw new Error("Invalid content format or size");
+    modelName ??= "Gemini";
+    focusTopics ??= defaultTopics;
+    apiEndpoint ??= "https://api.openai.com/v1/chat/completions";
+
+    const basePrompt = generatePrompt(focusTopics); // uses defaultTopics if none are fed
+
+    const fullPrompt = `${basePrompt} ${content.substring(0, 500)}`;
+
+    alert("precheck");
+
+    if (modelName == "ChatGPT") {
+      alert("postcheck");
+
+      if (!apiEndpoint) {
+        throw new Error("Missing required configuration");
       }
 
       const controller = new AbortController();
@@ -91,8 +89,8 @@ export async function analyzePage(content) {
 
       const data = await response.json();
       return data.choices[0].message.content;
-    } else {
-      throw new Error(`Model not supported ${modelName}`);
+    } else if (modelName == "Gemini") {
+      return await analyzeGemini(fullPrompt, apiKey, "gemini-1.5-flash");
     }
   } catch (error) {
     console.error("Analysis error:", error);
@@ -292,28 +290,4 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
       }
     });
   }
-});
-
-chrome.runtime.onInstalled.addListener((details) => {
-  const version = chrome.runtime.getManifest().version;
-  if (details.reason == "install") {
-    const extensionName = chrome.runtime.getManifest().name;
-    console.log(`Thank you for installing ${extensionName} ${version}`);
-  } else {
-    console.log(`Upgraded to ${version}`);
-  }
-
-  // save the base model and prompt
-  const modelName = "Gemini";
-  const basePrompt = generatePrompt();
-
-  chrome.storage.sync.set(
-    {
-      modelName,
-      basePrompt,
-    },
-    () => {
-      showStatus("Settings saved successfully!");
-    },
-  );
 });

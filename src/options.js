@@ -1,13 +1,9 @@
-let topics = ["work", "study", "personal development"];
+import { defaultTopics, generatePrompt } from "./prompt";
 
-function generatePrompt() {
-  return `Analyze this web content and determine if it's related to the following focus topics: ${topics.join(
-    ", "
-  )}. Return a JSON response with the following structure: {"isFocused": boolean, "reason": string, "topics": string[]}. Always include topics regardless of whether or not the content is related to the focus topic. Ignore advertisements, basic ui labels, and other irrelevant parts of the input.`;
-}
+let topics = defaultTopics;
 
 function updatePrompt() {
-  document.getElementById("basePrompt").innerHTML = generatePrompt();
+  document.getElementById("basePrompt").innerHTML = generatePrompt(topics);
 }
 
 const basePrompt = document.addEventListener("DOMContentLoaded", () => {
@@ -15,18 +11,25 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("list");
 
   // Load saved settings
-  chrome.storage.sync.get(["apiKey", "apiEndpoint", "focusTopics"], (data) => {
-    if (data.apiKey) {
-      document.getElementById("apiKey").value = data.apiKey;
-    }
-    if (data.apiEndpoint) {
-      document.getElementById("apiEndpoint").value = data.apiEndpoint;
-    }
-    if (data.focusTopics) {
-      topics = data.focusTopics;
-    }
-    updateChips();
-  });
+  chrome.storage.sync.get(
+    ["modelName", "apiKey", "apiEndpoint", "focusTopics"],
+    (data) => {
+      if (data.modelName) {
+        document.getElementById("modelName").value = data.modelName;
+      }
+      if (data.apiKey) {
+        document.getElementById("apiKey").value = data.apiKey;
+      }
+      if (data.apiEndpoint) {
+        document.getElementById("apiEndpoint").value =
+          data.apiEndpoint ?? "https://api.openai.com/v1/chat/completions";
+      }
+      if (data.focusTopics) {
+        topics = data.focusTopics;
+      }
+      updateChips();
+    },
+  );
 
   focusTopics.addEventListener("keypress", function (e) {
     if (e.key !== "Enter") {
@@ -52,7 +55,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     list.innerHTML = topics
       .map(
         (item, index) =>
-          `<li id="chip-item-${item}"><span>${item}</span><a><strong>X</strong></a></li>`
+          `<li id="chip-item-${item}"><span>${item}</span><a><strong>X</strong></a></li>`,
       )
       .join("");
 
@@ -74,8 +77,9 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     const modelName = document.getElementById("modelName").value;
     const apiKey = document.getElementById("apiKey").value.trim();
     const apiEndpoint = document.getElementById("apiEndpoint").value.trim();
-    const basePrompt = generatePrompt();
+    const basePrompt = generatePrompt(topics);
 
+    alert(modelName);
     /* Validate inputs */
 
     // // You shouldn't need a key
@@ -114,7 +118,7 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
             showStatus("Warning: Settings may not have saved correctly", true);
           }
         });
-      }
+      },
     );
   });
 

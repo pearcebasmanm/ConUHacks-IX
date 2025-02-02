@@ -1,15 +1,13 @@
 :root {
-    --accent-color: #23022e;
-    --primary-color: #b5838d; /* Light Pink */
-    --secondary-color: #6d6875; /* Lavender */
-    --text-color: #4a4a4a;
-    --background-color: #ffffff;
-    --error-color: 
-;
+    --ft-accent-color: #23022e;
+    --ft-primary-color: #b5838d; /* Light Pink */
+    --ft-secondary-color: #6d6875; /* Lavender */
+    --ft-text-color: #4a4a4a;
+    --ft-background-color: #ffffff;
 }
 
 button {
-    background-color: var(--primary-color);
+    background-color: var(--ft-primary-color);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -20,7 +18,7 @@ button {
 }
 
 button:hover {
-    background-color: var(--accent-color);
+    background-color: var(--ft-accent-color);
 }
 
 li:hover {
@@ -38,7 +36,7 @@ select,
 textarea,
 .container {
     padding: 10px;
-    border: 2px solid var(--primary-color);
+    border: 2px solid var(--ft-primary-color);
     border-radius: 5px;
     font-size: 14px;
     transition: border-color 0.3s ease;
@@ -51,5 +49,5 @@ textarea:focus,
 .container:focus,
 .content:focus {
     outline: none;
-    border-color: var(--accent-color);
+    border-color: var(--ft-accent-color);
 }

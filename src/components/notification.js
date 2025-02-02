@@ -10,15 +10,15 @@ export function createNotification(
     style.id = "focus-notification-styles";
     style.textContent = `
       :root {
-          --accent-color: #23022e;
-          --primary-color: #b5838d; /* Light Pink */
-          --secondary-color: #6d6875; /* Lavender */
-          --text-color: #4a4a4a;
-          --background-color: #ffffff;
+          --ft-accent-color: #23022e;
+          --ft-primary-color: #b5838d; /* Light Pink */
+          --ft-secondary-color: #6d6875; /* Lavender */
+          --ft-text-color: #4a4a4a;
+          --ft-background-color: #ffffff;
       }
 
       button {
-          background-color: var(--primary-color);
+          background-color: var(--ft-primary-color);
           color: white;
           border: none;
           padding: 10px 20px;
@@ -29,7 +29,7 @@ export function createNotification(
       }
 
       button:hover {
-          background-color: var(--accent-color);
+          background-color: var(--ft-accent-color);
       }
 
       .focus-notification {

@@ -47,26 +47,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     analyzePage(currentContent).then((response) => {
       alert(response);
+      const json = response.substring(8, response.length - 4);
+      alert(json);
+      const analysis = JSON.parse(json);
+      alert(analysis);
+      analysisDiv.innerHTML = `
+        <strong>Focus Analysis:</strong><br>
+        Is Focused: ${analysis.isFocused}<br>
+        Reason: ${analysis.reason}<br>
+        Topics: ${analysis.topics.join(", ")}
+      `;
     });
-
-    // const request = BackgroundRequest.createAnalyzeRequest(currentContent);
-    // chrome.runtime.sendMessage(request, (response) => {
-    //   if (response.success) {
-    //     try {
-    //       const analysis = JSON.parse(response.analysis);
-    //       analysisDiv.innerHTML = `
-    //         <strong>Focus Analysis:</strong><br>
-    //         Is Focused: ${analysis.isFocused}<br>
-    //         Reason: ${analysis.reason}<br>
-    //         Topics: ${analysis.topics.join(", ")}
-    //       `;
-    //     } catch (e) {
-    //       analysisDiv.textContent = response.analysis;
-    //     }
-    //   } else {
-    //     analysisDiv.innerHTML = `<span class="error">Analysis failed: ${response.error}</span>`;
-    //   }
-    // });
   });
 
   settingsBtn.addEventListener("click", () => {
