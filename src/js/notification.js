@@ -1,110 +1,20 @@
 import { messages } from "./util/messages";
 
-console.log("hi ho!");
-
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log(request);
   if (request.action === "showNotification") {
-    const { magnitude } = request;
+    const { magnitude, tabId } = request;
     const isInitial = magnitude == 0;
     const possibleMessages = messages[magnitude];
-    const message =
+    const [comment, speaker] =
       possibleMessages[Math.floor(Math.random() * possibleMessages.length)];
-    createNotification(message, isInitial);
+    createNotification(comment, speaker, isInitial, tabId);
   }
 });
 
-function createNotification(message, isInitial = false) {
+function createNotification(comment, speaker, isInitial, tabId) {
   // There shall be only one !!!
   document.querySelectorAll(".focus-notification").forEach((n) => n.remove());
-
-  // Add styles if not already added
-  if (!document.getElementById("focus-notification-styles")) {
-    const style = document.createElement("style");
-    style.id = "focus-notification-styles";
-    style.textContent = `
-      :root {
-          --ft-accent-color: #23022e;
-          --ft-primary-color: #b5838d; /* Light Pink */
-          --ft-secondary-color: #6d6875; /* Lavender */
-          --ft-text-color: #4a4a4a;
-          --ft-background-color: #ffffff;
-      }
-
-      button {
-          background-color: var(--ft-primary-color);
-          color: white;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 5px;
-          cursor: pointer;
-          font-size: 16px;
-          transition: background-color 0.3s ease;
-      }
-
-      button:hover {
-          background-color: var(--ft-accent-color);
-      }
-
-      .focus-notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: white;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        z-index: 10000;
-        max-width: 400px;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      }
-
-      .focus-notification-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-      }
-
-      .focus-notification-title {
-        font-weight: bold;
-        font-size: 16px;
-        color: #333;
-      }
-
-      .focus-notification-close {
-        background: none;
-        border: none;
-        font-size: 20px;
-        cursor: pointer;
-        color: #666;
-        padding: 0 5px;
-      }
-
-      .focus-notification-message {
-        margin-bottom: 15px;
-        color: #444;
-        line-height: 1.4;
-      }
-
-      .focus-notification-buttons {
-        display: flex;
-        gap: 10px;
-        justify-content: flex-end;
-      }
-
-      .focus-notification-back {
-        background-color: #f44336;
-        color: white;
-      }
-
-      .focus-notification-back:hover {
-        background-color: #da190b;
-      }
-    `;
-    document.head.appendChild(style);
-  }
 
   // Create notification element
   const notification = document.createElement("div");
@@ -115,10 +25,10 @@ function createNotification(message, isInitial = false) {
       <div class="focus-notification-title">Focus Alert</div>
       <button class="focus-notification-close">&times;</button>
     </div>
-    <div class="focus-notification-message">${message}</div>
+    <div class="focus-notification-message">${comment} -${speaker}</div>
     <div class="focus-notification-buttons">
-      <button class="focus-notification-continue">Continue Anyway</button>
-      ${isInitial && `<button class="focus-notification-back">Go Back</button>`}
+      <button class="ft-button focus-notification-continue">Continue Anyway</button>
+      ${isInitial ? `<button class="ft-button focus-notification-back">Go Back</button>` : ""}
     </div>
   `;
 
@@ -140,9 +50,7 @@ function createNotification(message, isInitial = false) {
     notification
       .querySelector(".focus-notification-back")
       .addEventListener("click", () => {
-        chrome.runtime.sendMessage(request, () => {
-          window.history.back();
-        });
+        chrome.tabs.goBack(tabId);
         notification.remove();
       });
   }

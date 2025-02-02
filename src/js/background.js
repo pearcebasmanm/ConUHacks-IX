@@ -19,6 +19,7 @@ function showNotification(id) {
   chrome.tabs.sendMessage(id, {
     action: "showNotification",
     magnitude: tabInfo.get(id).magnitude,
+    tabId: id,
   });
   console.log("should have sent");
   tabInfo.get(id).lastNotification = Date.now();
@@ -27,60 +28,9 @@ function showNotification(id) {
 // Check all tabs periodically for time-based notifications
 setInterval(() => {
   chrome.tabs.query({ active: true, currentWindow: true }, ([activeTab]) => {
-    if (!activeTab) {
-      return;
-    }
-    const { id, url } = activeTab;
-    console.log("Checking:", url);
-
-    if (tabInfo.has(id)) {
-      const tabDetails = tabInfo.get(id);
-      if (getDomain(url) === tabDetails.lastDomain) {
-        if (tabDetails.focused) {
-          console.log("Still Focused");
-          return; // still on a focused topic
-        } else {
-          if (Date.now() - tabDetails.lastNotification >= 0.5 * MINUTE) {
-            if (tabDetails.magnitude < 3) {
-              tabDetails.magnitude++;
-            }
-            showNotification(id);
-            console.log("Cooldown Elapsed: Reminder Sent");
-          } else {
-            console.log("On Cooldown");
-          }
-        }
-      } else {
-        analyze(url).then((response) => {
-          tabDetails.focused = response.isFocused;
-          tabDetails.lastDomain = getDomain(url);
-
-          if (!tabDetails.focused) {
-            tabDetails.magnitude = 0;
-            showNotification(id);
-            console.log("Went to Unfocused Domain: Push Sent");
-          } else {
-            console.log("Went to Focused Domain");
-          }
-        });
-      }
-    } else if (url && isValidUrl(url)) {
-      analyze(url).then((response) => {
-        let tabDetails = {
-          focused: response.isFocused,
-          lastDomain: getDomain(url),
-        };
-        tabInfo.set(id, tabDetails);
-        if (!tabDetails.focused) {
-          tabDetails.magnitude = 0;
-          showNotification(id);
-          console.log("Opened Unfocused Domain: Push Sent");
-        } else {
-          console.log("Opened Focused Domain");
-        }
-      });
-    } else {
-      console.log("Invalid URL");
+    if (activeTab) {
+      const { id, url } = activeTab;
+      processTabUpdate(id, url);
     }
   });
 }, 5 * SECOND);
@@ -91,48 +41,78 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 });
 
 // Update the tab listener to handle both initial and time notifications
-// chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-//   if (changeInfo.status === "complete" && tab.url && isValidUrl(tab.url)) {
-//     const domain = getDomain(tab.url);
-//     const tabDetails = tabInfo.get(tab.id);
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete" && tab.url && isValidUrl(tab.url)) {
+    console.log(tabId + " was updated");
+    processTabUpdate(tabId, tab.url);
+  }
+});
 
-//     if (tabDetails) {
-//       if (domain && domain !== tabDetails.lastDomain) {
-//         tabDetails.lastDomain = domain;
-//         tabDetails.lastNotification = Date.now();
+chrome.tabs.onActivated.addListener(() => {
+  chrome.tabs.query({ active: true, currentWindow: true }, ([activeTab]) => {
+    if (activeTab) {
+      const { id, url } = activeTab;
+      processTabUpdate(id, url);
+    }
+  });
+});
 
-//         analyze(tab.url).then((response) => {
-//           if (!response.isFocused) {
-//             chrome.tabs.sendMessage(tabId, {
-//               action: "showNotification",
-//               magnitude: 0,
-//             });
-//           } else {
-//             console.log("===WAS SUFFICIENTLY FOCUSED===");
-//           }
-//         });
-//       }
-//     } else {
-//       analyze(tab.url).then((response) => {
-//         if (!response.isFocused) {
-//           chrome.tabs.sendMessage(tabId, {
-//             action: "showNotification",
-//             magnitude: 0,
-//           });
-//         } else {
-//           console.log("===WAS SUFFICIENTLY FOCUSED===");
-//         }
-//       });
-//       tabInfo.set(tab.url, {
-//         domain: domain,
-//       });
-//     }
-//   }
-// });
+function processTabUpdate(id, url) {
+  console.log("Checking:", url);
+  if (tabInfo.has(id)) {
+    const tabDetails = tabInfo.get(id);
+    if (getDomain(url) === tabDetails.lastDomain) {
+      if (tabDetails.focused) {
+        console.log("Still Focused");
+        return; // still on a focused topic
+      } else {
+        if (Date.now() - tabDetails.lastNotification >= 0.5 * MINUTE) {
+          if (tabDetails.magnitude < 3) {
+            tabDetails.magnitude++;
+          }
+          showNotification(id);
+          console.log("Cooldown Elapsed: Reminder Sent");
+        } else {
+          console.log("On Cooldown");
+        }
+      }
+    } else {
+      analyze(url).then((response) => {
+        tabDetails.focused = response.isFocused;
+        tabDetails.lastDomain = getDomain(url);
+
+        if (!tabDetails.focused) {
+          tabDetails.magnitude = 0;
+          showNotification(id);
+          console.log("Went to Unfocused Domain: Push Sent");
+        } else {
+          console.log("Went to Focused Domain");
+        }
+      });
+    }
+  } else if (url && isValidUrl(url)) {
+    analyze(url).then((response) => {
+      let tabDetails = {
+        focused: response.isFocused,
+        lastDomain: getDomain(url),
+      };
+      tabInfo.set(id, tabDetails);
+      if (!tabDetails.focused) {
+        tabDetails.magnitude = 0;
+        showNotification(id);
+        console.log("Opened Unfocused Domain: Push Sent");
+      } else {
+        console.log("Opened Focused Domain");
+      }
+    });
+  } else {
+    console.log("Invalid URL");
+  }
+}
 
 // // Helper function to validate URLs
 
-// // Add window focus change handler
+// Add window focus change handler
 // chrome.windows.onFocusChanged.addListener((windowId) => {
 //   if (windowId !== chrome.windows.WINDOW_ID_NONE) {
 //     chrome.tabs.query({ active: true, windowId }, ([tab]) => {

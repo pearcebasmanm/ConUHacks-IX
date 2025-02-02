@@ -17,7 +17,7 @@
   ],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Focus Content Extractor",
+    "default_title": "Huginn & Muninn - Remove Distractions when Browsing",
     "default_icon": {
       "16": "assets/hugin_mugin_logo2.png",
       "48": "assets/hugin_mugin_logo2.png",

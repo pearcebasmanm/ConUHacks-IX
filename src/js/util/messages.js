@@ -1,7 +1,3 @@
-export const messages = [0, 1, 2].map((i) =>
-  huginMessages[i].concat(muninMessages[i]),
-);
-
 const huginMessages = [
   // Immediate Alerts
   [
@@ -49,3 +45,7 @@ const muninMessages = [
     "Okay, let’s be real… are you researching procrastination techniques at this point?",
   ],
 ].map((messagekind) => messagekind.map((message) => [message, "Muninn"]));
+
+export const messages = [0, 1, 2].map((i) =>
+  huginMessages[i].concat(muninMessages[i]),
+);
