@@ -84,6 +84,42 @@ style.textContent = `
       opacity: 0;
     }
   }
+
+  .reason-toggle {
+    width: 100%;
+    text-align: center;
+    padding: 5px;
+    margin-top: 10px;
+    background: none;
+    border: none;
+    border-top: 1px solid #eee;
+    cursor: pointer;
+    color: #666 !important;
+    font-size: 12px;
+  }
+
+  .reason-toggle:hover {
+    background-color: #f5f5f5;
+  }
+
+  .reason-content {
+    display: none;
+    padding: 10px;
+    margin-top: 5px;
+    background-color: #f9f9f9;
+    border-radius: 3px;
+    font-size: 14px;
+  }
+
+  .reason-content.expanded {
+    display: block;
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 `;
 document.head.appendChild(style);
 
@@ -128,8 +164,7 @@ function getRandomMessage(isFocused) {
 }
 
 // Function to create and show notification
-function showCustomNotification(data) {
-  const { analysis } = data;
+function showCustomNotification({ domain, analysis }) {
   const notification = document.createElement("div");
   notification.className = "focus-notification focus-extension";
 
@@ -144,8 +179,11 @@ function showCustomNotification(data) {
     </div>
     <div class="focus-notification-content">
       <div class="focus-status ${statusClass}">${statusText}</div>
-      <p><strong>Reason:</strong> ${analysis.reason}</p>
       <p><strong>${raven} says:</strong> "${message}"</p>
+      <button class="reason-toggle">Show Reason ▼</button>
+      <div class="reason-content">
+        <strong>Reason:</strong> ${analysis.reason}
+      </div>
     </div>
   `;
 
@@ -160,6 +198,14 @@ function showCustomNotification(data) {
   closeBtn.addEventListener("click", () => {
     notification.style.animation = "slideOut 0.3s ease-in forwards";
     setTimeout(() => notification.remove(), 300);
+  });
+
+  // Handle reason toggle
+  const reasonToggle = notification.querySelector(".reason-toggle");
+  const reasonContent = notification.querySelector(".reason-content");
+  reasonToggle.addEventListener("click", () => {
+    const isExpanded = reasonContent.classList.toggle("expanded");
+    reasonToggle.textContent = isExpanded ? "Hide Reason ▲" : "Show Reason ▼";
   });
 }
 
