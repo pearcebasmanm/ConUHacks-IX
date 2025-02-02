@@ -32,19 +32,14 @@ export async function analyzePage(content) {
       throw new Error("Missing api Key");
     }
 
+    content = content.substring(0, 500);
     modelName ??= "Gemini";
     focusTopics ??= defaultTopics;
     apiEndpoint ??= "https://api.openai.com/v1/chat/completions";
 
     const basePrompt = generatePrompt(focusTopics); // uses defaultTopics if none are fed
 
-    const fullPrompt = `${basePrompt} ${content.substring(0, 500)}`;
-
-    alert("precheck");
-
     if (modelName == "ChatGPT") {
-      alert("postcheck");
-
       if (!apiEndpoint) {
         throw new Error("Missing required configuration");
       }
@@ -80,6 +75,11 @@ export async function analyzePage(content) {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
+        alert(
+          `API request failed: ${response.status} ${response.statusText}${
+            errorData ? " - " + JSON.stringify(errorData) : ""
+          }`,
+        );
         throw new Error(
           `API request failed: ${response.status} ${response.statusText}${
             errorData ? " - " + JSON.stringify(errorData) : ""
@@ -90,10 +90,15 @@ export async function analyzePage(content) {
       const data = await response.json();
       return data.choices[0].message.content;
     } else if (modelName == "Gemini") {
-      return await analyzeGemini(fullPrompt, apiKey, "gemini-1.5-flash");
+      const fullPrompt = `${basePrompt} ${content}`;
+      const markdownEnclosed = await analyzeGemini(
+        fullPrompt,
+        apiKey,
+        "gemini-1.5-flash",
+      );
+      return markdownEnclosed.substring(8, markdownEnclosed.length - 4);
     }
   } catch (error) {
-    console.error("Analysis error:", error);
     throw new Error(`${error.message} (${error.name})`);
   }
 }

@@ -46,10 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     analysisDiv.textContent = "Analyzing...";
 
     analyzePage(currentContent).then((response) => {
-      alert(response);
-      const json = response.substring(8, response.length - 4);
-      alert(json);
-      const analysis = JSON.parse(json);
+      const analysis = JSON.parse(response);
       alert(analysis);
       analysisDiv.innerHTML = `
         <strong>Focus Analysis:</strong><br>

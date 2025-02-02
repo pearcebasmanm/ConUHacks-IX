@@ -78,20 +78,6 @@ const basePrompt = document.addEventListener("DOMContentLoaded", () => {
     const apiKey = document.getElementById("apiKey").value.trim();
     const apiEndpoint = document.getElementById("apiEndpoint").value.trim();
     const basePrompt = generatePrompt(topics);
-
-    alert(modelName);
-    /* Validate inputs */
-
-    // // You shouldn't need a key
-    // if (!apiKey) {
-    //   showStatus("API Key is required!", true);
-    //   return;
-    // }
-    // if (!apiKey.startsWith("sk-")) {
-    //   showStatus('Invalid API Key format. Should start with "sk-"', true);
-    //   return;
-    // }
-    //
     if (!apiEndpoint || !apiEndpoint.startsWith("http")) {
       showStatus("Invalid API endpoint URL", true);
       return;
