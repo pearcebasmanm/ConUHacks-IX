@@ -11,18 +11,12 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
+      "css": ["styles.css"]
     }
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Focus Content Extractor",
-    "default_icon": {
-      "16": "hugin_mugin_logo2.png",
-      "48": "hugin_mugin_logo2.png",
-      "128": "hugin_mugin_logo2.png"
-    }
+    "default_icon": "hugin_mugin_logo2.png"
   },
   "icons": {
     "16": "hugin_mugin_logo2.png",
